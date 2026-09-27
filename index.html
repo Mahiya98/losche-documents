@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document-Manager — Narayangonj Slag (731643520)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b5fd9'/%3E%3Ctext x='16' y='22' font-family='Segoe UI,Arial' font-size='14' font-weight='700' fill='%23fff' text-anchor='middle'%3EDM%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#ffffff; --line:#dde3e9; --ink:#16202b; --muted:#67788a;
+  --accent:#b3341f; --accent2:#1f5fa8; --ok:#1e7a45; --warn:#b8860b; --bad:#c0392b;
+  --chip:#eef2f6; --shadow:0 1px 3px rgba(16,32,48,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--accent2)}
+.wrap{max-width:1500px;margin:0 auto;padding:0 18px 60px}
+
+/* ---------- header ---------- */
+header{background:linear-gradient(135deg,#16202b,#243748);color:#fff;padding:22px 0 18px;border-bottom:4px solid var(--accent)}
+header .wrap{padding-bottom:0}
+h1{margin:0 0 4px;font-size:23px;letter-spacing:.2px;font-weight:600}
+.sub{color:#a9bccd;font-size:13px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.meta span{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);
+  padding:4px 10px;border-radius:20px;font-size:12px;color:#e6eef5}
+.meta span b{color:#fff;font-weight:600}
+
+/* ---------- toolbar ---------- */
+.toolbar{position:sticky;top:0;z-index:30;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;box-shadow:var(--shadow);margin-top:18px;padding:12px 14px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toolbar input[type=search]{flex:1 1 280px;min-width:220px;padding:9px 12px;border:1px solid var(--line);
+  border-radius:8px;font-size:14px;background:#fbfcfd}
+.toolbar input[type=search]:focus{outline:2px solid #cfe0f3;border-color:var(--accent2)}
+select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fbfcfd;font-size:13px;max-width:230px}
+label.ck{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap;cursor:pointer}
+.count{margin-left:auto;font-size:13px;color:var(--muted);white-space:nowrap}
+.count b{color:var(--ink)}
+.btn{padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font-size:13px}
+.btn:hover{background:#f0f4f8}
+.btn.on{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+/* ---------- layout ---------- */
+.cols{display:grid;grid-template-columns:270px 1fr;gap:16px;margin-top:16px;align-items:start}
+@media(max-width:980px){.cols{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.card h2{margin:0;padding:13px 16px;font-size:13px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);border-bottom:1px solid var(--line);font-weight:600}
+.side{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow:auto}
+.side .grp{padding:8px 10px 14px}
+.side .grp-title{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);
+  margin:8px 6px 6px;font-weight:700}
+.tree{list-style:none;margin:0;padding:0}
+.tree li{margin:0}
+.tree button{display:flex;width:100%;gap:8px;align-items:baseline;text-align:left;background:none;border:0;
+  padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--ink);font-family:inherit}
+.tree button:hover{background:#f0f4f8}
+.tree button.sel{background:#e7eff9;font-weight:600;color:var(--accent2)}
+.tree .code{font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--muted);min-width:34px}
+.tree button.sel .code{color:var(--accent2)}
+.tree .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree .n{font-size:11px;color:var(--muted);background:var(--chip);border-radius:10px;padding:1px 7px}
+
+/* ---------- table ---------- */
+.tbl-wrap{overflow:auto;max-height:calc(100vh - 210px)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{position:sticky;top:0;background:#eef2f6;z-index:5;text-align:left;font-weight:600;font-size:12px;
+  text-transform:uppercase;letter-spacing:.5px;color:#4a5c6e;padding:10px 12px;border-bottom:2px solid var(--line);
+  cursor:pointer;user-select:none;white-space:nowrap}
+thead th:hover{background:#e3eaf1}
+thead th .ar{color:var(--accent2);font-size:10px}
+tbody td{padding:9px 12px;border-bottom:1px solid #edf1f5;vertical-align:top}
+tbody tr:hover{background:#f7fafd}
+tbody tr:nth-child(even){background:#fbfcfd}
+tbody tr:nth-child(even):hover{background:#f2f7fc}
+.t{font-weight:600}
+.docno{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:#33475c}
+.pill{display:inline-block;padding:1px 8px;border-radius:11px;font-size:11.5px;font-weight:600;
+  background:var(--chip);color:#40566b;font-family:Consolas,"Courier New",monospace}
+.pill.cls{background:#e8eefb;color:#2a4f8f}
+.mono{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--muted)}
+.open{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;font-size:12.5px;
+  color:var(--accent2);border:1px solid #cfe0f3;background:#f4f9ff;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.open:hover{background:#e6f1fd}
+.miss{color:var(--bad);font-weight:600;font-size:12.5px}
+.alt{display:inline-block;margin-left:6px;font-size:11.5px;color:var(--ok);font-weight:600;
+  border:1px solid #bfe3cd;background:#f1fbf5;padding:1px 6px;border-radius:5px;text-decoration:none}
+.alt:hover{background:#e3f6ea}
+.flag{display:inline-block;margin-left:6px;font-size:10.5px;font-weight:700;letter-spacing:.4px;
+  color:var(--warn);border:1px solid #ecd9a4;background:#fdf7e8;padding:1px 5px;border-radius:4px}
+
+/* ---------- viewer ---------- */
+.mask{position:fixed;inset:0;background:rgba(11,26,44,.68);display:none;z-index:60;padding:22px;
+  box-sizing:border-box;backdrop-filter:blur(2px)}
+.mask.on{display:flex;align-items:center;justify-content:center}
+.vbox{background:#fff;border-radius:12px;width:min(1140px,100%);height:min(90vh,940px);
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.vhead{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f5f8fc;
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.vhead .vt{font-weight:700;flex:1;min-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vhead .vm{font-size:12px;color:var(--muted);font-family:Consolas,monospace;flex-basis:100%}
+.vbody{flex:1;position:relative;background:#4a5560}
+.vbody iframe{width:100%;height:100%;border:0;background:#fff}
+.vpdf{position:absolute;inset:0;overflow:auto;background:#4a5560;padding:14px;text-align:center}
+.vpdf canvas{display:block;width:100%;max-width:1100px;margin:0 auto 14px;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.5)}
+.vpdf .vload{color:#e7edf4;padding:50px 20px;font-size:13px}
+.vpdf .verr{color:#ffd7d2;padding:40px 20px;font-size:13px;line-height:1.7}
+.vimg{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;background:#fff}
+.vnote{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;text-align:center;padding:30px;color:#fff}
+.vnote.on{display:flex}
+.vnote p{max-width:560px;margin:0;line-height:1.6;color:#e7edf4}
+.vnote .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.vnote .acts a,.vnote .acts button{cursor:pointer;font:inherit;font-size:13px;font-weight:600;
+  padding:8px 14px;border-radius:7px;border:1px solid #9fb4cc;background:#f4f9ff;color:var(--accent2);
+  text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.vnote .acts a:hover,.vnote .acts button:hover{background:#e6f1fd}
+.x{cursor:pointer;font-size:20px;line-height:1;border:0;background:none;color:var(--muted);padding:4px 8px}
+.x:hover{color:var(--bad)}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+
+/* ---------- quality / about ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:980px){.grid2{grid-template-columns:1fr}}
+.pad{padding:14px 16px}
+.pad ul{margin:6px 0 0;padding-left:20px}
+.pad li{margin:4px 0}
+.stat{display:flex;gap:10px;flex-wrap:wrap}
+.stat div{flex:1 1 120px;background:#f7fafc;border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:center}
+.stat .v{font-size:21px;font-weight:700;color:var(--ink)}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+details{border-top:1px solid var(--line);padding:10px 16px}
+summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--accent2)}
+details[open] summary{margin-bottom:8px}
+.arch{font-family:Consolas,"Courier New",monospace;font-size:12.5px;background:#101820;color:#cfe3d5;
+  padding:12px 14px;border-radius:8px;overflow:auto;white-space:pre;margin:8px 0 0;line-height:1.55}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:4px;font-weight:700;margin-right:6px}
+.badge.ok{background:#e2f4e9;color:var(--ok)}
+.badge.bad{background:#fdeaea;color:var(--bad)}
+.badge.warn{background:#fdf4e0;color:var(--warn)}
+footer{margin-top:26px;color:var(--muted);font-size:12px;text-align:center;line-height:1.7}
+kbd{background:#eef2f6;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;
+  padding:0 5px;font-size:11px;font-family:Consolas,monospace}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1 id="h-title">Technical Documentation</h1>
+    <div class="sub" id="h-sub"></div>
+    <div class="meta" id="h-meta"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Search designation or document number…  (press /)" autocomplete="off">
+    <select id="f-doc"><option value="">All document types</option></select>
+    <select id="f-list"><option value="">All lists</option></select>
+    <button class="btn" id="f-missing" title="Show only index entries whose file is missing">Missing files</button>
+    <button class="btn" id="reset">Reset</button>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="cols">
+    <aside class="card side">
+      <h2>Equipment classes</h2>
+      <div class="grp">
+        <div class="grp-title">Filter</div>
+        <ul class="tree" id="tree-cls"></ul>
+        <div class="grp-title" style="margin-top:14px">Data source</div>
+        <div class="mono" style="padding:0 8px;font-size:12px;line-height:1.7">
+          1_Data\ (this folder)
+        </div>
+      </div>
+    </aside>
+
+    <main class="card">
+      <h2>List of documents</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-s="t" style="width:44%">Designation <span class="ar" id="ar-t"></span></th>
+              <th data-s="n">Document-No <span class="ar" id="ar-n"></span></th>
+              <th data-s="d">Rev / Date <span class="ar" id="ar-d"></span></th>
+              <th data-s="s">Sh. <span class="ar" id="ar-s"></span></th>
+              <th data-s="c">Type <span class="ar" id="ar-c"></span></th>
+              <th data-s="k">Class <span class="ar" id="ar-k"></span></th>
+              <th data-s="l">List <span class="ar" id="ar-l"></span></th>
+              <th>File</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty" id="empty" style="display:none">No documents match the current filter.</div>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    Static HTML rebuild of the 2005 Loesche Document-Manager (project 731643520).<br>
+    Documents are opened from the <span class="mono">1_Data</span> folder next to this file.
+  </footer>
+</div>
+
+<div class="mask" id="mask" role="dialog" aria-modal="true" aria-labelledby="v-title">
+  <div class="vbox">
+    <div class="vhead">
+      <span class="vt" id="v-title"></span>
+      <a class="btn" id="v-new" href="#" target="_blank" rel="noopener">New tab ↗</a>
+      <a class="btn" id="v-dl" href="#" download>Download ↓</a>
+      <button class="x" id="v-close" title="Close (Esc)">×</button>
+      <span class="vm" id="v-path"></span>
+    </div>
+    <div class="vbody">
+      <div class="vpdf" id="v-pdf" style="display:none"></div>
+      <img class="vimg" id="v-img" alt="" style="display:none">
+      <iframe id="v-frame" src="about:blank" title="Document preview"></iframe>
+      <div class="vnote" id="v-note"></div>
+    </div>
+  </div>
+</div>
+
+<script id="payload" type="application/json">{"project":{"Project":"Narayangonj@Slag","Project_no":"731643520","Plant":"Slag@Grinding@Plant","Customer":"Akij@Cement@Company@Dikusha@Bangladesch","Machine":"LM@46.2+2@S","DocInfoStat":"final","DocInfoDatRev":"2005-12-01@/@A","MainLanguage":"English","DocuType":"Operating@and@Maintenance","SecondLanguage":"\u003c@not@available@\u003e"},"classes":{"A00":"Mill (general)","A01":"Mill: Auxilliaries, Reserve Parts","A02":"Mill: Mill Stand, Pedestals, Gas Duct Supports","A03":"Mill: Body, Door, Lining","A04":"Mill: Table, Grinding Parts","A05":"Mill: Hydraulic Cabinet HSMS (Roller Lubrication)","A06":"Mill: Spring Assemblies","A07":"Mill: Hydraulic System, Hydraulic Cabinets HSLM / HSSW","A08":"Mill: Pipings, Lubrication Line","A09":"Mill: Reject Box, Slide, Pn. Control, Pn. Interlock","A10":"Mill: Platforms, Ladders, Gangways","A11":"Mill: LM-Drive, Mill-Gearbox","A12":"Mill: Water Injection / Grinding Bed Sprinkler","A13":"Mill: Swinging-out Device","A14":"Mill: Monitorings, Measuring Points, etc.","A15":"Mill: Rocker Arms, Lever Sealings","A16":"Mill: Rollers, Slip Ring Sealings","B00":"Classifier (general)","B01":"Classifier: Housing, Lining","B02":"Classifier: Rotor, Bearing, Lubrication Line","B03":"Classifier: Drive, Classifier-Gearbox","B04":"Classifier: Flap Positioning; Flap System","B05":"Classifier: Platforms, etc.","C00":"Gate Feeder (general)","C01":"Gate Feeder: Hydraulic; Hydraulic Cabinets HSKS","C02":"Gate Feeder: Pipings","C03":"Gate Feeder: Cylinder Fixing, Transport Device","C04":"Gate Feeder: Guard, Oil Sump","D00":"Screw Feeder","E00":"Star Wheel Feeder","E01":"Star Wheel Feeder: Hand measuring Points","E02":"Star Wheel Feeder: Gearbox","F00":"Cyclones (left Hand)","F01":"Cyclones (right Hand)","G00":"LOMA Heater (general)","G01":"LOMA Heater: Combustion Chamber","H00":"Stationary Air Compressor","I00":"Hurriclones","J00":"Coal Dust Dosing System","J01":"Grinding Aid Station","K00":"Sealing Air Fan","K01":"Mill Fan","K02":"Booster Fan","K03":"Fan to LOMA-Heater","K04":"Shock Blower","L00":"Main Filter","L01":"Feed Dedusting","L02":"Product Transport Dedusting","M00":"Flaps, Valves, Dampers","N00":"Hoists","O00":"CO2 Inerting System","O01":"N2 Inerting System","P00":"Weigh Feeders / Apron Feeders","P01":"Belt Conveyors","P02":"Bucket Elevators","P03":"Cellular Wheel Sluices","P04":"Mill Coaling Plant","P05":"Mill Drag Link Conveyor","P06":"Mill Screw Feeder","Q00":"Metal Detectors","Q01":"Sample Extractor","Q02":"Magnetic Separators","R00":"Silos, Bins, Explosion Doors","S00":"Weighing Equipment","T00":"Welding Machines","U00":"-","V00":"-","W00":"-","X00":"-","Y00":"-","Z00":"Additional Documents","Z01":"Loesche Maintenance Instructions","Z02":"Erection Instructions","Z03":"Project Drawings: Foundations, Layouts, etc.","Z04":"Loesche Information"},"doccodes":{"01":"Assembly Drawing","02":"Assembly Drawing / Partlist","03":"Assembly Instructions","04":"Assembly-/ Operating-/ Maintenance Manual","05":"Assembly Partlist","06":"Data Sheet","07":"Dimension or Disposition Sheet","08":"Internet-/ HTML-Document","09":"Media Clip","10":"Operating-/ Maintenance Manual","11":"Project Drawing","12":"Quality-Assurance-Guidline","13":"Technical Description","14":"Scheme, Diagram","15":"Spare Parts"},"exts":{".pdf":"Adobe-Acrobat Document (*.PDF)",".doc":"MS-Word Document (*.DOC)",".tif":"TIFF Drawing (*.TIF)",".dwg":"AutoCAD Drawing (*.DWG)",".htm":"HTML Document (*.HTM)",".dxf":"Drawing Exchange Format (*.DXF)",".mpg":"Media Clip (*.MPG)",".avi":"Media Clip (*.AVI)",".xls":"MS-Excel Document (*.XLS)"},"records":[{"t":"Plant: Documentation","n":"2-2","d":"24.11.2004/0","c":"05","l":"LD-01","s":"1","k":"A00","p":"1_Data/2-2.pdf","ok":true,"pdf":"1_Data/2-2.pdf","alt":""},{"t":"Loesche-Mill LM 46.2 + 2 CS","n":"10219052","d":"08.11.2004/0","c":"05","l":"LD-01","s":"2","k":"A00","p":"1_Data/10219052.pdf","ok":true,"pdf":"1_Data/10219052.pdf","alt":""},{"t":"Loesche-Mill LM 46.2 + 2 CS","n":"025817-00-0","d":"18.10.2004/0","c":"01","l":"LD-01","s":"2","k":"A00","p":"1_Data/025817-00-0.pdf","ok":true,"pdf":"1_Data/025817-00-0.pdf","alt":""},{"t":"Mill LM 46.2 + 2 S; Dimensions Sheet","n":"M902243-00-2","d":"19.02.2003/0","c":"07","l":"LD-01","s":"2","k":"A00","p":"1_Data/M902243-00-2.pdf","ok":true,"pdf":"1_Data/M902243-00-2.pdf","alt":""},{"t":"Mill LM 46.2 + 2 S; Disposition Sheet","n":"902275-00-3","d":"14.10.2003/A","c":"07","l":"LD-01","s":"2","k":"A00","p":"1_Data/902275-00-3.pdf","ok":true,"pdf":"1_Data/902275-00-3.pdf","alt":""},{"t":"Scheme of Loads     Sheet 1","n":"927032-00-2","d":"31.07.2001/0","c":"06","l":"LD-01","s":"3","k":"A00","p":"1_Data/927032-00-2BL1.pdf","ok":true,"pdf":"1_Data/927032-00-2BL1.pdf","alt":""},{"t":"Scheme of Loads     Sheet 2","n":"927032-00-2","d":"31.07.2001/0","c":"06","l":"LD-01","s":"3","k":"A00","p":"1_Data/927032-00-2BL2.pdf","ok":true,"pdf":"1_Data/927032-00-2BL2.pdf","alt":""},{"t":"Moments of Inertia","n":"927097-00-4","d":"23.04.2004/0","c":"06","l":"LD-01","s":"3","k":"A00","p":"1_Data/927097-00-4.pdf","ok":true,"pdf":"1_Data/927097-00-4.pdf","alt":""},{"t":"Starting Torque","n":"4.L1092-0002/01","d":"09.08.1991/0","c":"06","l":"LD-01","s":"3","k":"A00","p":"1_Data/4-L1092-0002-01en.pdf","ok":true,"pdf":"1_Data/4-L1092-0002-01en.pdf","alt":""},{"t":"LM-Auxiliaries; cpl.","n":"10221102","d":"21.07.2004/0","c":"05","l":"LD-01","s":"4","k":"A01","p":"1_Data/10221102.pdf","ok":true,"pdf":"1_Data/10221102.pdf","alt":""},{"t":"Auxiliaries:Table; cpl.","n":"10214546","d":"21.07.2004/0","c":"05","l":"LD-01","s":"5","k":"A01","p":"1_Data/10214546.pdf","ok":true,"pdf":"1_Data/10214546.pdf","alt":""},{"t":"Auxiliaries:Table; cpl.","n":"046322-00-4","d":"06.01.2003/A","c":"01","l":"LD-01","s":"5","k":"A01","p":"1_Data/046322-00-4.pdf","ok":true,"pdf":"1_Data/046322-00-4.pdf","alt":""},{"t":"Auxilliaries Table; Support; cpl.","n":"10214544","d":"21.07.2004/0","c":"05","l":"LD-01","s":"6","k":"A01","p":"1_Data/10214544.pdf","ok":true,"pdf":"1_Data/10214544.pdf","alt":""},{"t":"Auxilliaries Table; Support; cpl.","n":"046323-00-3","d":"12.06.2002/0","c":"01","l":"LD-01","s":"6","k":"A01","p":"1_Data/046323-00-3.pdf","ok":true,"pdf":"1_Data/046323-00-3.pdf","alt":""},{"t":"Auxiliaries:Roller (M); cpl.","n":"10176446","d":"21.07.2004/0","c":"05","l":"LD-01","s":"7","k":"A01","p":"1_Data/10176446.pdf","ok":true,"pdf":"1_Data/10176446.pdf","alt":""},{"t":"Auxiliaries:Roller (M); cpl.","n":"025557-00-3","d":"19.10.1999/0","c":"01","l":"LD-01","s":"7","k":"A01","p":"1_Data/025557-00-3.pdf","ok":true,"pdf":"1_Data/025557-00-3.pdf","alt":""},{"t":"Auxiliaries:Roller (S); cpl.","n":"10176447","d":"21.07.2004/0","c":"05","l":"LD-01","s":"8","k":"A01","p":"1_Data/10176447.pdf","ok":true,"pdf":"1_Data/10176447.pdf","alt":""},{"t":"Auxiliaries:Roller (S); cpl.","n":"025558-00-2","d":"22.10.1999/0","c":"01","l":"LD-01","s":"8","k":"A01","p":"1_Data/025558-00-2.pdf","ok":true,"pdf":"1_Data/025558-00-2.pdf","alt":""},{"t":"Auxiliaries:Rocker Arm (M); cpl.","n":"10177244","d":"21.07.2004/0","c":"05","l":"LD-01","s":"9","k":"A01","p":"1_Data/10177244.pdf","ok":true,"pdf":"1_Data/10177244.pdf","alt":""},{"t":"Auxiliaries:Rocker Arm (M); cpl.","n":"027387-00-3","d":"21.07.1998/0","c":"01","l":"LD-01","s":"9","k":"A01","p":"1_Data/027387-00-3.pdf","ok":true,"pdf":"1_Data/027387-00-3.pdf","alt":""},{"t":"Auxiliaries:Rocker Arm (S); cpl.","n":"10178644","d":"21.07.2004/0","c":"05","l":"LD-01","s":"10","k":"A01","p":"1_Data/10178644.pdf","ok":true,"pdf":"1_Data/10178644.pdf","alt":""},{"t":"Auxiliaries:Spring Assembly (M); cpl.","n":"10214529","d":"21.07.2004/0","c":"05","l":"LD-01","s":"11","k":"A01","p":"1_Data/10214529.pdf","ok":true,"pdf":"1_Data/10214529.pdf","alt":""},{"t":"Auxiliaries:Spring Assembly (M); cpl.","n":"044281-00-0","d":"18.07.2003/A","c":"01","l":"LD-01","s":"11","k":"A01","p":"1_Data/044281-00-0.pdf","ok":true,"pdf":"1_Data/044281-00-0.pdf","alt":""},{"t":"Auxiliaries:Spring Assembly (S); cpl.","n":"10163731","d":"21.07.2004/0","c":"05","l":"LD-01","s":"12","k":"A01","p":"1_Data/10163731.pdf","ok":true,"pdf":"1_Data/10163731.pdf","alt":""},{"t":"Auxiliaries:Spring Assembly (S); cpl.","n":"003918-00-3","d":"25.01.2002/A","c":"01","l":"LD-01","s":"12","k":"A01","p":"1_Data/003918-00-3.pdf","ok":true,"pdf":"1_Data/003918-00-3.pdf","alt":""},{"t":"Auxiliaries:Piping; cpl.","n":"10176449","d":"21.07.2004/0","c":"05","l":"LD-01","s":"13","k":"A01","p":"1_Data/10176449.pdf","ok":true,"pdf":"1_Data/10176449.pdf","alt":""},{"t":"Hand Measuring Points; cpl.","n":"10176344","d":"21.07.2004/0","c":"05","l":"LD-01","s":"14","k":"A14","p":"1_Data/10176344.pdf","ok":true,"pdf":"1_Data/10176344.pdf","alt":""},{"t":"Hand Measuring Points; cpl.","n":"025467-00-2","d":"17.11.1998/0","c":"01","l":"LD-01","s":"14","k":"A14","p":"1_Data/025467-00-2.pdf","ok":true,"pdf":"1_Data/025467-00-2.pdf","alt":""},{"t":"Tire Profile Ruler; cpl.","n":"10176450","d":"21.07.2004/0","c":"05","l":"LD-01","s":"15","k":"A01","p":"1_Data/10176450.pdf","ok":true,"pdf":"1_Data/10176450.pdf","alt":""},{"t":"Tire Profile Ruler; cpl.","n":"025561-00-2","d":"25.10.1999/0","c":"01","l":"LD-01","s":"15","k":"A01","p":"1_Data/025561-00-2.pdf","ok":true,"pdf":"1_Data/025561-00-2.pdf","alt":""},{"t":"Oil Drain Device; cpl.","n":"10163765","d":"21.07.2004/0","c":"05","l":"LD-01","s":"16","k":"A01","p":"1_Data/10163765.pdf","ok":true,"pdf":"1_Data/10163765.pdf","alt":""},{"t":"Oil Drain Device; cpl.","n":"003935-00-4","d":"16.02.1995/A","c":"01","l":"LD-01","s":"16","k":"A01","p":"1_Data/003935-00-4.pdf","ok":true,"pdf":"1_Data/003935-00-4.pdf","alt":""},{"t":"Lifter; cpl.","n":"10176351","d":"21.07.2004/0","c":"05","l":"LD-01","s":"17","k":"A01","p":"1_Data/10176351.pdf","ok":true,"pdf":"1_Data/10176351.pdf","alt":""},{"t":"Lifter; cpl.","n":"025474-00-2","d":"25.01.1999/0","c":"01","l":"LD-01","s":"17","k":"A01","p":"1_Data/025474-00-2.pdf","ok":true,"pdf":"1_Data/025474-00-2.pdf","alt":""},{"t":"LM-Reserve Parts; cpl.","n":"10220814","d":"01.07.2004/0","c":"05","l":"LD-01","s":"18","k":"A01","p":"1_Data/10220814.pdf","ok":true,"pdf":"1_Data/10220814.pdf","alt":""},{"t":"Reserve Parts: Roller (M)","n":"10176361","d":"01.07.2004/0","c":"05","l":"LD-01","s":"18","k":"A01","p":"1_Data/10176361.pdf","ok":true,"pdf":"1_Data/10176361.pdf","alt":""},{"t":"Reserve Parts: Roller (S)","n":"10170748","d":"01.07.2004/0","c":"05","l":"LD-01","s":"18","k":"A01","p":"1_Data/10170748.pdf","ok":true,"pdf":"1_Data/10170748.pdf","alt":""},{"t":"Reserve Parts: Connecting Pipeline","n":"10205868","d":"01.07.2004/0","c":"05","l":"LD-01","s":"18","k":"A01","p":"1_Data/10205868.pdf","ok":true,"pdf":"1_Data/10205868.pdf","alt":""},{"t":"Reserve Parts: LM-Lubrication Line; cpl.","n":"10182908","d":"01.07.2004/0","c":"05","l":"LD-01","s":"18","k":"A01","p":"1_Data/10182908.pdf","ok":true,"pdf":"1_Data/10182908.pdf","alt":""},{"t":"Name Plates-LM; cpl.","n":"10213599","d":"31.08.2004/0","c":"05","l":"LD-01","s":"19","k":"A00","p":"1_Data/10213599.pdf","ok":true,"pdf":"1_Data/10213599.pdf","alt":""},{"t":"Mill Stand; cpl.","n":"10214136","d":"01.03.2004/0","c":"05","l":"LD-01","s":"20","k":"A02","p":"1_Data/10214136.pdf","ok":true,"pdf":"1_Data/10214136.pdf","alt":""},{"t":"Mill Stand; cpl.     Sheet 1","n":"032656-00-0","d":"25.11.2004/0","c":"01","l":"LD-01","s":"20","k":"A02","p":"1_Data/032656-00-0BL1_rev0.pdf","ok":true,"pdf":"1_Data/032656-00-0BL1_rev0.pdf","alt":""},{"t":"Mill Stand; cpl.     Sheet 2","n":"032656-00-0","d":"25.11.2004/0","c":"01","l":"LD-01","s":"20","k":"A02","p":"1_Data/032656-00-0BL2_rev0.pdf","ok":true,"pdf":"1_Data/032656-00-0BL2_rev0.pdf","alt":""},{"t":"Mill Stand; cpl.     Sheet 3","n":"032656-00-0","d":"25.11.2004/0","c":"01","l":"LD-01","s":"20","k":"A02","p":"1_Data/032656-00-0BL3_rev0.pdf","ok":true,"pdf":"1_Data/032656-00-0BL3_rev0.pdf","alt":""},{"t":"Mill Stand; cpl.     Sheet 4","n":"032656-00-0","d":"25.11.2004/0","c":"01","l":"LD-01","s":"20","k":"A02","p":"1_Data/032656-00-0BL4_rev0.pdf","ok":true,"pdf":"1_Data/032656-00-0BL4_rev0.pdf","alt":""},{"t":"Foundation Frame","n":"043136-00-0","d":"07.06.2002/0","c":"01","l":"LD-01","s":"20","k":"A02","p":"1_Data/043136-00-0.pdf","ok":true,"pdf":"1_Data/043136-00-0.pdf","alt":""},{"t":"Gear Box Base Plate","n":"043135-00-1","d":"07.06.2002/0","c":"01","l":"LD-01","s":"20","k":"A02","p":"1_Data/043135-00-1_REV0.pdf","ok":true,"pdf":"1_Data/043135-00-1_REV0.pdf","alt":""},{"t":"Pedestal; cpl.","n":"10214336","d":"01.03.2004/0","c":"05","l":"LD-01","s":"21","k":"A02","p":"1_Data/10214336.pdf","ok":true,"pdf":"1_Data/10214336.pdf","alt":""},{"t":"Pedestal; cpl.","n":"044237-00-1","d":"09.04.2003/B","c":"01","l":"LD-01","s":"21","k":"A02","p":"1_Data/044237-00-1.pdf","ok":true,"pdf":"1_Data/044237-00-1.pdf","alt":""},{"t":"Inspection Ladder; cpl.","n":"10212459","d":"16.03.2004/0","c":"05","l":"LD-01","s":"22","k":"A10","p":"1_Data/10212459.pdf","ok":true,"pdf":"1_Data/10212459.pdf","alt":""},{"t":"Inspection Ladder; cpl.     Sheet 1","n":"046319-00-0","d":"10.06.2002/0","c":"01","l":"LD-01","s":"22","k":"A10","p":"1_Data/046319-00-0BL1.pdf","ok":true,"pdf":"1_Data/046319-00-0BL1.pdf","alt":""},{"t":"Inspection Ladder; cpl.     Sheet 2","n":"046319-00-0","d":"10.06.2002/0","c":"01","l":"LD-01","s":"22","k":"A10","p":"1_Data/046319-00-0BL2.pdf","ok":true,"pdf":"1_Data/046319-00-0BL2.pdf","alt":""},{"t":"Mill Body; cpl.","n":"10209646","d":"16.03.2004/0","c":"05","l":"LD-01","s":"23","k":"A03","p":"1_Data/10209646.pdf","ok":true,"pdf":"1_Data/10209646.pdf","alt":""},{"t":"Mill Body; cpl.","n":"027690-00-0","d":"04.06.2003/A","c":"01","l":"LD-01","s":"23","k":"A03","p":"1_Data/027690-00-0.pdf","ok":true,"pdf":"1_Data/027690-00-0.pdf","alt":""},{"t":"Mill Door; cpl.","n":"10163718","d":"16.03.2004/0","c":"05","l":"LD-01","s":"24","k":"A03","p":"1_Data/10163718.pdf","ok":true,"pdf":"1_Data/10163718.pdf","alt":""},{"t":"Mill Door; cpl.","n":"003905-00-2","d":"25.10.1993/0","c":"01","l":"LD-01","s":"24","k":"A03","p":"1_Data/003905-00-2.pdf","ok":true,"pdf":"1_Data/003905-00-2.pdf","alt":""},{"t":"Lining; cpl.","n":"10210697","d":"06.04.2004/0","c":"05","l":"LD-01","s":"25","k":"A03","p":"1_Data/10210697.pdf","ok":true,"pdf":"1_Data/10210697.pdf","alt":""},{"t":"Lining; cpl.","n":"032565-00-0","d":"10.12.2001/0","c":"01","l":"LD-01","s":"25","k":"A03","p":"1_Data/032565-00-0.pdf","ok":true,"pdf":"1_Data/032565-00-0.pdf","alt":""},{"t":"Table; cpl.","n":"10220648","d":"21.06.2004/0","c":"05","l":"LD-01","s":"26","k":"A04","p":"1_Data/10220648.pdf","ok":true,"pdf":"1_Data/10220648.pdf","alt":""},{"t":"Table; cpl.","n":"025806-00-0","d":"15.06.2004/0","c":"01","l":"LD-01","s":"26","k":"A04","p":"1_Data/025806-00-0.pdf","ok":true,"pdf":"1_Data/025806-00-0.pdf","alt":""},{"t":"Table; Louvre Ring; Disposition Sheet","n":"927081-00-2","d":"18.06.2004/0","c":"07","l":"LD-01","s":"26","k":"A04","p":"1_Data/927081-00-2.pdf","ok":true,"pdf":"1_Data/927081-00-2.pdf","alt":""},{"t":"Grinding Parts; cpl.","n":"10219156","d":"23.03.2004/0","c":"05","l":"LD-02","s":"1","k":"A04","p":"1_Data/10219156.pdf","ok":true,"pdf":"1_Data/10219156.pdf","alt":""},{"t":"Roller (M); cpl.","n":"10216988","d":"05.04.2004/0","c":"05","l":"LD-02","s":"2","k":"A16","p":"1_Data/10216988.pdf","ok":true,"pdf":"1_Data/10216988.pdf","alt":""},{"t":"Roller (M); cpl.","n":"021874-00-0","d":"19.07.2004/A","c":"01","l":"LD-02","s":"2","k":"A16","p":"1_Data/021874-00-0a.pdf","ok":true,"pdf":"1_Data/021874-00-0a.pdf","alt":""},{"t":"Slip-Ring Sealing (M); cpl.","n":"10161146","d":"05.04.2004/0","c":"05","l":"LD-02","s":"3","k":"A16","p":"1_Data/10161146.pdf","ok":true,"pdf":"1_Data/10161146.pdf","alt":""},{"t":"Slip-Ring Sealing (M); cpl.","n":"001572-00-3","d":"10.10.2003/A","c":"01","l":"LD-02","s":"3","k":"A16","p":"1_Data/001572-00-3.pdf","ok":true,"pdf":"1_Data/001572-00-3.pdf","alt":""},{"t":"Safe Roller Transport Device (M); cpl.","n":"10216990","d":"05.04.2004/0","c":"05","l":"LD-02","s":"4","k":"A16","p":"1_Data/10216990.pdf","ok":true,"pdf":"1_Data/10216990.pdf","alt":""},{"t":"Safe Roller Transport Device (M); cpl.","n":"043044-00-3","d":"30.03.2004/A","c":"01","l":"LD-02","s":"4","k":"A16","p":"1_Data/043044-00-3.pdf","ok":true,"pdf":"1_Data/043044-00-3.pdf","alt":""},{"t":"Roller Rotation Monitoring (M); cpl.","n":"10161137","d":"16.03.2004/0","c":"05","l":"LD-02","s":"5","k":"A14","p":"1_Data/10161137.pdf","ok":true,"pdf":"1_Data/10161137.pdf","alt":""},{"t":"Roller Rotation Monitoring (M); cpl.","n":"001563-00-1","d":"30.04.1997/A","c":"01","l":"LD-02","s":"5","k":"A14","p":"1_Data/001563-00-1A.pdf","ok":true,"pdf":"1_Data/001563-00-1A.pdf","alt":""},{"t":"Roller (S); cpl.","n":"10219538","d":"06.04.2004/0","c":"05","l":"LD-02","s":"6","k":"A16","p":"1_Data/10219538.pdf","ok":true,"pdf":"1_Data/10219538.pdf","alt":""},{"t":"Roller (S); cpl.","n":"043288-00-0","d":"31.03.2004/0","c":"01","l":"LD-02","s":"6","k":"A16","p":"1_Data/043288-00-0.pdf","ok":true,"pdf":"1_Data/043288-00-0.pdf","alt":""},{"t":"Slip-Ring Sealing (S); cpl.","n":"10161056","d":"06.04.2004/0","c":"05","l":"LD-02","s":"7","k":"A16","p":"1_Data/10161056.pdf","ok":true,"pdf":"1_Data/10161056.pdf","alt":""},{"t":"Slip-Ring Sealing (S); cpl.","n":"001472-00-3","d":"02.09.1993/0","c":"01","l":"LD-02","s":"7","k":"A16","p":"1_Data/001472-00-3.pdf","ok":true,"pdf":"1_Data/001472-00-3.pdf","alt":""},{"t":"Safe Roller Transport Device (S); cpl.","n":"10215869","d":"06.04.2004/0","c":"05","l":"LD-02","s":"8","k":"A16","p":"1_Data/10215869.pdf","ok":true,"pdf":"1_Data/10215869.pdf","alt":""},{"t":"Safe Roller Transport Device (S); cpl.","n":"043246-00-3","d":"29.07.2003/0","c":"01","l":"LD-02","s":"8","k":"A16","p":"1_Data/043246-00-3.pdf","ok":true,"pdf":"1_Data/043246-00-3.pdf","alt":""},{"t":"Roller Rotation Monitoring (S); cpl.","n":"10180373","d":"16.02.2004/0","c":"05","l":"LD-02","s":"9","k":"A14","p":"1_Data/10180373.pdf","ok":true,"pdf":"1_Data/10180373.pdf","alt":""},{"t":"Roller Rotation Monitoring (S); cpl.","n":"034103-00-1","d":"06.02.1996/0","c":"01","l":"LD-02","s":"9","k":"A14","p":"1_Data/034103-00-1.pdf","ok":true,"pdf":"1_Data/034103-00-1.pdf","alt":""},{"t":"Rocker Arm (M); cpl.","n":"10212608","d":"16.03.2004/0","c":"05","l":"LD-02","s":"10","k":"A15","p":"1_Data/10212608.pdf","ok":true,"pdf":"1_Data/10212608.pdf","alt":""},{"t":"Rocker Arm (M); cpl.     Sheet 1","n":"044230-00-0","d":"05.04.2005/A","c":"01","l":"LD-02","s":"10","k":"A15","p":"1_Data/044230-00-0BL1.pdf","ok":true,"pdf":"1_Data/044230-00-0BL1.pdf","alt":""},{"t":"Rocker Arm (M); cpl.     Sheet 2","n":"044230-00-0","d":"05.04.2005/A","c":"01","l":"LD-02","s":"10","k":"A15","p":"1_Data/044230-00-0BL2.pdf","ok":true,"pdf":"1_Data/044230-00-0BL2.pdf","alt":""},{"t":"Lever Transport Device; cpl.","n":"10162774","d":"16.03.2004/0","c":"05","l":"LD-02","s":"11","k":"A15","p":"1_Data/10162774.pdf","ok":true,"pdf":"1_Data/10162774.pdf","alt":""},{"t":"Lever Transport Device; cpl.","n":"002915-00-2","d":"25.01.2002/A","c":"01","l":"LD-02","s":"11","k":"A15","p":"1_Data/002915-00-2.pdf","ok":true,"pdf":"1_Data/002915-00-2.pdf","alt":""},{"t":"Lever Sealing (M); cpl.","n":"10217245","d":"16.03.2004/0","c":"05","l":"LD-02","s":"12","k":"A15","p":"1_Data/10217245.pdf","ok":true,"pdf":"1_Data/10217245.pdf","alt":""},{"t":"Lever Sealing (M); cpl.","n":"043260-00-0","d":"17.12.2003/A","c":"01","l":"LD-02","s":"12","k":"A15","p":"1_Data/043260-00-0.pdf","ok":true,"pdf":"1_Data/043260-00-0.pdf","alt":""},{"t":"Rocker Arm Monitoring (M); cpl.","n":"10213217","d":"12.07.2004/0","c":"05","l":"LD-02","s":"13","k":"A14","p":"1_Data/10213217.pdf","ok":true,"pdf":"1_Data/10213217.pdf","alt":""},{"t":"Rocker Arm Monitoring (M); cpl.","n":"044228-00-1","d":"08.07.2004/A","c":"01","l":"LD-02","s":"13","k":"A14","p":"1_Data/044228-00-1.pdf","ok":true,"pdf":"1_Data/044228-00-1.pdf","alt":""},{"t":"Rocker Arm (S); cpl.","n":"10176336","d":"16.03.2004/0","c":"05","l":"LD-02","s":"14","k":"A15","p":"1_Data/10176336.pdf","ok":true,"pdf":"1_Data/10176336.pdf","alt":""},{"t":"Rocker Arm (S); cpl.","n":"025458-00-0","d":"10.07.2003/C","c":"01","l":"LD-02","s":"14","k":"A15","p":"1_Data/025458-00-0.pdf","ok":true,"pdf":"1_Data/025458-00-0.pdf","alt":""},{"t":"Lever Sealing (S); cpl.","n":"10215827","d":"16.03.2004/0","c":"05","l":"LD-02","s":"15","k":"A15","p":"1_Data/10215827.pdf","ok":true,"pdf":"1_Data/10215827.pdf","alt":""},{"t":"Lever Sealing (S); cpl.","n":"043240-00-0","d":"10.07.2003/0","c":"01","l":"LD-02","s":"15","k":"A15","p":"1_Data/043240-00-0.pdf","ok":true,"pdf":"1_Data/043240-00-0.pdf","alt":""},{"t":"Rocker Arm Monitoring (S); cpl.","n":"10175838","d":"15.06.2004/0","c":"05","l":"LD-02","s":"16","k":"A14","p":"1_Data/10175838.pdf","ok":true,"pdf":"1_Data/10175838.pdf","alt":""},{"t":"Rocker Arm Monitoring (S); cpl.","n":"024438-00-1","d":"14.07.1999/A","c":"01","l":"LD-02","s":"16","k":"A14","p":"1_Data/024438-00-1.pdf","ok":true,"pdf":"1_Data/024438-00-1.pdf","alt":""},{"t":"Stroke Monitoring (S); cpl.","n":"10175842","d":"15.06.2004/0","c":"05","l":"LD-02","s":"17","k":"A14","p":"1_Data/10175842.pdf","ok":true,"pdf":"1_Data/10175842.pdf","alt":""},{"t":"Stroke Monitoring (S); cpl.","n":"024442-00-1","d":"26.04.2000/A","c":"01","l":"LD-02","s":"17","k":"A14","p":"1_Data/024442-00-1.pdf","ok":true,"pdf":"1_Data/024442-00-1.pdf","alt":""},{"t":"Spring Assembly (M); cpl.","n":"10213426","d":"07.06.2004/0","c":"05","l":"LD-02","s":"18","k":"A06","p":"1_Data/10213426.pdf","ok":true,"pdf":"1_Data/10213426.pdf","alt":""},{"t":"Spring Assembly (M); cpl.","n":"024540-00-0","d":"02.06.2004/D","c":"01","l":"LD-02","s":"18","k":"A06","p":"1_Data/024540-00-0D.pdf","ok":true,"pdf":"1_Data/024540-00-0D.pdf","alt":""},{"t":"Buffer (M); cpl.","n":"10169782","d":"12.05.2004/0","c":"05","l":"LD-02","s":"19","k":"A06","p":"1_Data/10169782.pdf","ok":true,"pdf":"1_Data/10169782.pdf","alt":""},{"t":"Buffer (M); cpl.","n":"012506-00-1","d":"10.08.1994/0","c":"01","l":"LD-02","s":"19","k":"A06","p":"1_Data/012506-00-1_REV0.pdf","ok":true,"pdf":"1_Data/012506-00-1_REV0.pdf","alt":""},{"t":"Spring Assembly (S); cpl.","n":"10176340","d":"08.04.2004/0","c":"05","l":"LD-02","s":"20","k":"A06","p":"1_Data/10176340.pdf","ok":true,"pdf":"1_Data/10176340.pdf","alt":""},{"t":"Spring Assembly (S); cpl.","n":"025462-00-0","d":"22.10.1998/0","c":"01","l":"LD-02","s":"20","k":"A06","p":"1_Data/025462-00-0.pdf","ok":true,"pdf":"1_Data/025462-00-0.pdf","alt":""},{"t":"Buffer (S); cpl.","n":"10176108","d":"08.04.2004/0","c":"05","l":"LD-02","s":"21","k":"A06","p":"1_Data/10176108.pdf","ok":true,"pdf":"1_Data/10176108.pdf","alt":""},{"t":"Buffer (S); cpl.","n":"025170-00-1","d":"14.10.1995/0","c":"01","l":"LD-02","s":"21","k":"A06","p":"1_Data/025170-00-1.pdf","ok":true,"pdf":"1_Data/025170-00-1.pdf","alt":""},{"t":"Ring Pipeline; cpl.","n":"10214904","d":"21.06.2004/0","c":"05","l":"LD-02","s":"22","k":"A08","p":"1_Data/10214904.pdf","ok":true,"pdf":"1_Data/10214904.pdf","alt":""},{"t":"Ring Pipeline; cpl.","n":"025756-00-1","d":"13.05.2003/0","c":"01","l":"LD-02","s":"22","k":"A08","p":"1_Data/025756-00-1.pdf","ok":true,"pdf":"1_Data/025756-00-1.pdf","alt":""},{"t":"Connecting Pipeline; cpl.","n":"10222534","d":"28.10.2004/0","c":"05","l":"LD-02","s":"23","k":"A08","p":"1_Data/10222534.pdf","ok":true,"pdf":"1_Data/10222534.pdf","alt":""},{"t":"Connecting Pipeline; cpl.","n":"032846-00-0","d":"11.10.2004/0","c":"01","l":"LD-02","s":"23","k":"A08","p":"1_Data/032846-00-0.pdf","ok":true,"pdf":"1_Data/032846-00-0.pdf","alt":""},{"t":"LM-Lubrication Line; cpl.","n":"10220995","d":"14.07.2004/0","c":"05","l":"LD-02","s":"24","k":"A08","p":"1_Data/10220995.pdf","ok":true,"pdf":"1_Data/10220995.pdf","alt":""},{"t":"LM-Lubrication Line; cpl.","n":"025810-00-0","d":"12.07.2004/0","c":"01","l":"LD-02","s":"24","k":"A08","p":"1_Data/025810-00-0_REV0.pdf","ok":true,"pdf":"1_Data/025810-00-0_REV0.pdf","alt":""},{"t":"Lubrication Line; Scheme","n":"902274-00-3","d":"13.07.2004/0","c":"14","l":"LD-02","s":"24","k":"A08","p":"1_Data/902274-00-3.pdf","ok":true,"pdf":"1_Data/902274-00-3.pdf","alt":""},{"t":"Seal Air Piping; cpl.","n":"10211040","d":"15.06.2004/0","c":"05","l":"LD-02","s":"25","k":"A08","p":"1_Data/10211040.pdf","ok":true,"pdf":"1_Data/10211040.pdf","alt":""},{"t":"Seal Air Piping; cpl.","n":"047453-00-0","d":"06.03.2003/A","c":"01","l":"LD-02","s":"25","k":"A08","p":"1_Data/047453-00-0a.pdf","ok":true,"pdf":"1_Data/047453-00-0a.pdf","alt":""},{"t":"Sealing Air Control; cpl.","n":"10214307","d":"15.06.2004/0","c":"05","l":"LD-02","s":"26","k":"A14","p":"1_Data/10214307.pdf","ok":true,"pdf":"1_Data/10214307.pdf","alt":""},{"t":"Sealing Air Control; cpl.","n":"043211-00-2","d":"10.02.2004/A","c":"01","l":"LD-02","s":"26","k":"A14","p":"1_Data/043211-00-2.pdf","ok":true,"pdf":"1_Data/043211-00-2.pdf","alt":""},{"t":"Vibration Monitoring; cpl.","n":"10213761","d":"15.06.2004/0","c":"05","l":"LD-03","s":"1","k":"A14","p":"1_Data/10213761.pdf","ok":true,"pdf":"1_Data/10213761.pdf","alt":""},{"t":"Vibration Monitoring; cpl.","n":"029763-00-2","d":"28.11.2002/0","c":"01","l":"LD-03","s":"1","k":"A14","p":"1_Data/029763-00-2.pdf","ok":true,"pdf":"1_Data/029763-00-2.pdf","alt":""},{"t":"Grinding-Bed Sprinkler; cpl.","n":"10214280","d":"04.05.2004/0","c":"05","l":"LD-03","s":"2","k":"A12","p":"1_Data/10214280.pdf","ok":true,"pdf":"1_Data/10214280.pdf","alt":""},{"t":"Grinding-Bed Sprinkler; cpl.","n":"026522-00-1","d":"04.05.2004/0","c":"01","l":"LD-03","s":"2","k":"A12","p":"1_Data/026522-00-1_REV0.pdf","ok":true,"pdf":"1_Data/026522-00-1_REV0.pdf","alt":""},{"t":"Scheme: Grinding-Bed Sprinkler 4 m³/h","n":"901812-00-2","d":"07.08.2003/A","c":"14","l":"LD-03","s":"2","k":"A12","p":"1_Data/901812-00-2.pdf","ok":true,"pdf":"1_Data/901812-00-2.pdf","alt":""},{"t":"Mill Platform; cpl.","n":"10214681","d":"04.05.2004/0","c":"05","l":"LD-03","s":"3","k":"A10","p":"1_Data/10214681.pdf","ok":true,"pdf":"1_Data/10214681.pdf","alt":""},{"t":"Mill Platform; cpl.     Sheet 1","n":"055349-00-0","d":"12.11.2002/0","c":"01","l":"LD-03","s":"3","k":"A10","p":"1_Data/055349-00-0BL1.pdf","ok":true,"pdf":"1_Data/055349-00-0BL1.pdf","alt":""},{"t":"Mill Platform; cpl.     Sheet 2","n":"055349-00-0","d":"12.11.2002/0","c":"01","l":"LD-03","s":"3","k":"A10","p":"1_Data/055349-00-0BL2.pdf","ok":true,"pdf":"1_Data/055349-00-0BL2.pdf","alt":""},{"t":"Mill Platform; cpl.     Sheet 3","n":"055349-00-0","d":"12.11.2002/0","c":"01","l":"LD-03","s":"3","k":"A10","p":"1_Data/055349-00-0BL3.pdf","ok":true,"pdf":"1_Data/055349-00-0BL3.pdf","alt":""},{"t":"LM-Drive; cpl.","n":"10221984","d":"17.09.2004/0","c":"05","l":"LD-03","s":"4","k":"A11","p":"1_Data/10221984.pdf","ok":true,"pdf":"1_Data/10221984.pdf","alt":""},{"t":"Motor Frame","n":"10221978","d":"17.09.2004/0","c":"05","l":"LD-03","s":"4","k":"A11","p":"1_Data/10221978.pdf","ok":true,"pdf":"1_Data/10221978.pdf","alt":""},{"t":"Motor Frame","n":"043317-00-0","d":"01.09.2004/0","c":"01","l":"LD-03","s":"4","k":"A11","p":"1_Data/043317-00-0.pdf","ok":true,"pdf":"1_Data/043317-00-0.pdf","alt":""},{"t":"Motor Base Frame","n":"10221981","d":"17.09.2004/0","c":"05","l":"LD-03","s":"4","k":"A11","p":"1_Data/10221981.pdf","ok":true,"pdf":"1_Data/10221981.pdf","alt":""},{"t":"Motor Base Frame","n":"043318-00-1","d":"31.08.2004/0","c":"01","l":"LD-03","s":"4","k":"A11","p":"1_Data/043318-00-1_REV0.pdf","ok":true,"pdf":"1_Data/043318-00-1_REV0.pdf","alt":""},{"t":"Coupling Guard, 2-Parts","n":"10221982","d":"17.09.2004/0","c":"05","l":"LD-03","s":"4","k":"A11","p":"1_Data/10221982.pdf","ok":true,"pdf":"1_Data/10221982.pdf","alt":""},{"t":"Coupling Guard, 2-Parts","n":"043278-00-0","d":"03.09.2004/0","c":"01","l":"LD-03","s":"4","k":"A11","p":"1_Data/043278-00-0.pdf","ok":true,"pdf":"1_Data/043278-00-0.pdf","alt":""},{"t":"Console","n":"10221983","d":"17.09.2004/0","c":"05","l":"LD-03","s":"4","k":"A11","p":"1_Data/10221983.pdf","ok":true,"pdf":"1_Data/10221983.pdf","alt":""},{"t":"Console","n":"043279-00-1","d":"11.08.2004/0","c":"01","l":"LD-03","s":"4","k":"A11","p":"1_Data/043279-00-1.pdf","ok":true,"pdf":"1_Data/043279-00-1.pdf","alt":""},{"t":"Hydraulic Cabinet HSMS 850","n":"10220489","d":"22.06.2004/0","c":"05","l":"LD-03","s":"5","k":"A05","p":"1_Data/10220489.pdf","ok":true,"pdf":"1_Data/10220489.pdf","alt":""},{"t":"Dimenson Sheet; Hydraulic Cabinet HSMS","n":"M917745-00-3","d":"30.01.2004/A","c":"07","l":"LD-03","s":"5","k":"A05","p":"1_Data/M917745-00-3.pdf","ok":true,"pdf":"1_Data/M917745-00-3.pdf","alt":""},{"t":"Hydraulic Cabinet HSLM 1000","n":"10220488","d":"22.06.2004/0","c":"05","l":"LD-03","s":"6","k":"A07","p":"1_Data/10220488.pdf","ok":true,"pdf":"1_Data/10220488.pdf","alt":""},{"t":"Dimenson Sheet; Hydraulic Cabinet HSLM","n":"M917735-00-3","d":"04.06.2004/B","c":"07","l":"LD-03","s":"6","k":"A07","p":"1_Data/M917735-00-3.pdf","ok":true,"pdf":"1_Data/M917735-00-3.pdf","alt":""},{"t":"Hydraulic Cabinet HSSW 100","n":"10220490","d":"22.06.2004/0","c":"05","l":"LD-03","s":"7","k":"A07","p":"1_Data/10220490.pdf","ok":true,"pdf":"1_Data/10220490.pdf","alt":""},{"t":"Dimenson Sheet; Hydraulic Cabinet HSSW","n":"M917689-00-3","d":"30.01.2004/A","c":"07","l":"LD-03","s":"7","k":"A07","p":"1_Data/M917689-00-3.pdf","ok":true,"pdf":"1_Data/M917689-00-3.pdf","alt":""},{"t":"Swinging Device","n":"10220449","d":"03.06.2004/0","c":"05","l":"LD-03","s":"8","k":"A13","p":"1_Data/10220449.pdf","ok":true,"pdf":"1_Data/10220449.pdf","alt":""},{"t":"Swinging Device","n":"021876-00-3","d":"10.12.2002/0","c":"01","l":"LD-03","s":"8","k":"A13","p":"1_Data/021876-00-3.pdf","ok":true,"pdf":"1_Data/021876-00-3.pdf","alt":""},{"t":"Swinging Device; cpl.","n":"10213986","d":"03.06.2004/0","c":"05","l":"LD-03","s":"9","k":"A13","p":"1_Data/10213986.pdf","ok":true,"pdf":"1_Data/10213986.pdf","alt":""},{"t":"Swinging Device; cpl.","n":"021877-00-0","d":"20.09.2002/0","c":"01","l":"LD-03","s":"9","k":"A13","p":"1_Data/021877-00-0.pdf","ok":true,"pdf":"1_Data/021877-00-0.pdf","alt":""},{"t":"Classifier LSKS 66 CS","n":"10219053","d":"11.08.2004/0","c":"05","l":"LD-03","s":"10","k":"B00","p":"1_Data/10219053.pdf","ok":true,"pdf":"1_Data/10219053.pdf","alt":""},{"t":"Classifier LSKS 66 CS","n":"033989-00-3","d":"20.04.2005/0","c":"01","l":"LD-03","s":"10","k":"B00","p":"1_Data/033989-00-3.pdf","ok":true,"pdf":"1_Data/033989-00-3.pdf","alt":""},{"t":"Classifier LSKS 66; Dimensions Sheet","n":"M929538-00-3","d":"05.11.2002/0","c":"07","l":"LD-03","s":"10","k":"B00","p":"1_Data/M929538-00-3.pdf","ok":true,"pdf":"1_Data/M929538-00-3.pdf","alt":""},{"t":"Classifier LSKS 66; Disposition Sheet","n":"913605-01-3","d":"19.04.2000/0","c":"07","l":"LD-03","s":"10","k":"B00","p":"1_Data/913605-01-3.pdf","ok":true,"pdf":"1_Data/913605-01-3.pdf","alt":""},{"t":"Classifier Housing; cpl.","n":"10219859","d":"26.04.2004/0","c":"05","l":"LD-03","s":"11","k":"B01","p":"1_Data/10219859.pdf","ok":true,"pdf":"1_Data/10219859.pdf","alt":""},{"t":"Classifier Housing; cpl.","n":"040685-00-0","d":"23.03.2004/0","c":"01","l":"LD-03","s":"11","k":"B01","p":"1_Data/040685-00-0.pdf","ok":true,"pdf":"1_Data/040685-00-0.pdf","alt":""},{"t":"Classifier Upper Housing Lining; cpl.","n":"10212125","d":"16.03.2004/0","c":"05","l":"LD-03","s":"12","k":"B01","p":"1_Data/10212125.pdf","ok":true,"pdf":"1_Data/10212125.pdf","alt":""},{"t":"Classifier Upper Housing Lining; cpl.","n":"028598-00-1","d":"24.06.2002/0","c":"01","l":"LD-03","s":"12","k":"B01","p":"1_Data/028598-00-1.pdf","ok":true,"pdf":"1_Data/028598-00-1.pdf","alt":""},{"t":"Classifier Lining; cpl.","n":"10219499","d":"06.04.2004/0","c":"05","l":"LD-03","s":"13","k":"B01","p":"1_Data/10219499.pdf","ok":true,"pdf":"1_Data/10219499.pdf","alt":""},{"t":"Classifier Lining; cpl.","n":"028725-00-1","d":"10.03.2005/A","c":"01","l":"LD-03","s":"13","k":"B01","p":"1_Data/028725-00-1.pdf","ok":true,"pdf":"1_Data/028725-00-1.pdf","alt":""},{"t":"Rotor; cpl.","n":"10217503","d":"16.03.2004/0","c":"05","l":"LD-03","s":"14","k":"B02","p":"1_Data/10217503.pdf","ok":true,"pdf":"1_Data/10217503.pdf","alt":""},{"t":"Rotor; cpl.","n":"047948-00-0","d":"30.09.2004/A","c":"01","l":"LD-03","s":"14","k":"B02","p":"1_Data/047948-00-0A.pdf","ok":true,"pdf":"1_Data/047948-00-0A.pdf","alt":""},{"t":"Bearing Cartridge; cpl.","n":"10217478","d":"16.03.2004/0","c":"05","l":"LD-03","s":"15","k":"B02","p":"1_Data/10217478.pdf","ok":true,"pdf":"1_Data/10217478.pdf","alt":""},{"t":"Bearing Cartridge; cpl.","n":"049334-00-1","d":"10.10.2003/0","c":"01","l":"LD-03","s":"15","k":"B02","p":"1_Data/049334-00-1.pdf","ok":true,"pdf":"1_Data/049334-00-1.pdf","alt":""},{"t":"Classifier Lubrication Line; cpl.","n":"10217735","d":"11.08.2004/0","c":"05","l":"LD-03","s":"16","k":"B02","p":"1_Data/10217735.pdf","ok":true,"pdf":"1_Data/10217735.pdf","alt":""},{"t":"Classifier Lubrication Line; cpl.","n":"047960-00-1","d":"24.06.2004/A","c":"01","l":"LD-03","s":"16","k":"B02","p":"1_Data/047960-00-1.pdf","ok":true,"pdf":"1_Data/047960-00-1.pdf","alt":""},{"t":"Classifier Lubrication Line; Scheme","n":"902228-00-4","d":"17.10.2003/A","c":"14","l":"LD-03","s":"16","k":"B02","p":"1_Data/902228-00-4.pdf","ok":true,"pdf":"1_Data/902228-00-4.pdf","alt":""},{"t":"Classifier Drive; cpl.","n":"10225050","d":"09.05.2005/0","c":"05","l":"LD-03","s":"17","k":"B03","p":"1_Data/10225050.pdf","ok":true,"pdf":"1_Data/10225050.pdf","alt":""},{"t":"Classifier Drive; cpl.","n":"064003-00-0","d":"08.04.2005/0","c":"01","l":"LD-03","s":"17","k":"B03","p":"1_Data/064003-00-0.pdf","ok":true,"pdf":"1_Data/064003-00-0.pdf","alt":""},{"t":"Flap Positioning; cpl.","n":"10217971","d":"16.03.2004/0","c":"05","l":"LD-03","s":"18","k":"B04","p":"1_Data/10217971.pdf","ok":true,"pdf":"1_Data/10217971.pdf","alt":""},{"t":"Flap Positioning; cpl.","n":"055457-00-0","d":"01.10.2004/A","c":"01","l":"LD-03","s":"18","k":"B04","p":"1_Data/055457-00-0A.pdf","ok":true,"pdf":"1_Data/055457-00-0A.pdf","alt":""},{"t":"Flap Carrier; cpl.","n":"10217970","d":"16.03.2004/0","c":"05","l":"LD-03","s":"19","k":"B04","p":"1_Data/10217970.pdf","ok":true,"pdf":"1_Data/10217970.pdf","alt":""},{"t":"Flap Carrier; cpl.","n":"055458-00-2","d":"22.10.2003/0","c":"01","l":"LD-03","s":"19","k":"B04","p":"1_Data/055458-00-2.pdf","ok":true,"pdf":"1_Data/055458-00-2.pdf","alt":""},{"t":"Auxiliaries:Flap Positioning; cpl.","n":"10217955","d":"16.03.2004/0","c":"05","l":"LD-03","s":"20","k":"B04","p":"1_Data/10217955.pdf","ok":true,"pdf":"1_Data/10217955.pdf","alt":""},{"t":"Auxiliaries:Flap Positioning; cpl.","n":"055463-00-1","d":"30.10.2003/0","c":"01","l":"LD-03","s":"20","k":"B04","p":"1_Data/055463-00-1.pdf","ok":true,"pdf":"1_Data/055463-00-1.pdf","alt":""},{"t":"Classifier Platform; cpl.","n":"10214557","d":"16.03.2004/0","c":"05","l":"LD-03","s":"21","k":"B05","p":"1_Data/10214557.pdf","ok":true,"pdf":"1_Data/10214557.pdf","alt":""},{"t":"Classifier Platform; cpl.     Sheet 1","n":"047674-00-0","d":"28.10.2002/0","c":"01","l":"LD-03","s":"21","k":"B05","p":"1_Data/047674-00-0BL1.pdf","ok":true,"pdf":"1_Data/047674-00-0BL1.pdf","alt":""},{"t":"Classifier Platform; cpl.     Sheet 2","n":"047674-00-0","d":"28.10.2002/0","c":"01","l":"LD-03","s":"21","k":"B05","p":"1_Data/047674-00-0BL2.pdf","ok":true,"pdf":"1_Data/047674-00-0BL2.pdf","alt":""},{"t":"Lubrication Instructions for Grinding Plant","n":"4.Q7316-2950","d":"25.05.2005/A","c":"10","l":"AD/PD","s":"3","k":"Z01","p":"1_Data/Lubrication Instruction.DOC","ok":true,"pdf":"1_Data/Lubrication Instruction.pdf","alt":""},{"t":"Principle Safety References (Instruction Manual)","n":"BA908372-00-4","d":"09.11.1993/A","c":"10","l":"OM-01","s":"1","k":"A00","p":"1_Data/BA908372-00-4.pdf","ok":true,"pdf":"1_Data/BA908372-00-4.pdf","alt":""},{"t":"LOESCHE-Roller Grinding Mill; Safety (Instruction Manual)","n":"BA911191-00-4","d":"12.03.1997/A","c":"10","l":"OM-01","s":"1","k":"A00","p":"1_Data/BA911091-00-4.pdf","ok":true,"pdf":"1_Data/BA911091-00-4.pdf","alt":""},{"t":"LOESCHE-Mill LM 46.2+2; Operating Instructions","n":"BA911149-03-4","d":"25.04.2005/0","c":"10","l":"OM-01","s":"2","k":"A00","p":"1_Data/BA911149-03-4.pdf","ok":true,"pdf":"1_Data/BA911149-03-4.pdf","alt":""},{"t":"DUBO-Bolt Retainers; Installation Instructions","n":"4.F4369-0001","d":"09.11.1995/A","c":"03","l":"OM-01","s":"3","k":"A03","p":"1_Data/4369de0001.doc","ok":true,"pdf":"","alt":""},{"t":"Pretension Forces and Torques for screwed Connections","n":"4.F4251-0001","d":"14.05.1998/B","c":"06","l":"OM-01","s":"3","k":"A03","p":"1_Data/4251e0001.doc","ok":true,"pdf":"","alt":""},{"t":"LM-Auxilliaries: Measurement Table; Grinding Parts-Wear","n":"3.F1158","d":"06.03.1976/0","c":"06","l":"OM-01","s":"4","k":"A01","p":"1_Data/3-F1158E.pdf","ok":true,"pdf":"1_Data/3-F1158E.pdf","alt":""},{"t":"Auxilliaries: Hydraulic Handpump; MATRA-Documentation","n":"-","d":"2000/0","c":"10","l":"OM-01","s":"4","k":"A01","p":"1_Data/matra_en.pdf","ok":true,"pdf":"1_Data/matra_en.pdf","alt":""},{"t":"Table: Mounting Dam Border; Working Instructions","n":"AA911244-01-4","d":"21.05.2001/A","c":"03","l":"OM-01","s":"5","k":"A04","p":"1_Data/911244E1.DOC","ok":true,"pdf":"1_Data/911244E1.pdf","alt":""},{"t":"Table: SUPERBOLT Pretensioning System; P\u0026S-Documentation","n":"-","d":"2000/0","c":"13","l":"OM-01","s":"5","k":"A04","p":"1_Data/P\u0026S-Instructions_GB.pdf","ok":true,"pdf":"1_Data/P\u0026S-Instructions_GB.pdf","alt":""},{"t":"Roller: Grinding Rollers with Taper Roller Bearings; Assembly and Maintenance","n":"4.F998/1-13","d":"22.08.1973/0","c":"03","l":"OM-01","s":"6","k":"A16","p":"1_Data/0998EN.pdf","ok":true,"pdf":"1_Data/0998EN.pdf","alt":""},{"t":"Slip-Ring Sealing (M) (S): Mounting Instructions","n":"AA911333-00-4","d":"24.09.2001/0","c":"03","l":"OM-01","s":"7","k":"A16","p":"1_Data/911333E0.DOC","ok":true,"pdf":"1_Data/911333E0.pdf","alt":""},{"t":"Slip-Ring Sealing (M) (S): Installation Tool; Dimensions","n":"910025-00-2","d":"04.05.1999/0","c":"07","l":"OM-01","s":"7","k":"A16","p":"1_Data/910025-00-2.pdf","ok":true,"pdf":"1_Data/910025-00-2.pdf","alt":""},{"t":"Pipings on Mill: PARKER-Fittings; Assembly Instructions","n":"4100-2","d":"2000/0","c":"03","l":"OM-01","s":"8","k":"A08","p":"1_Data/Parker en.pdf","ok":true,"pdf":"1_Data/Parker en.pdf","alt":""},{"t":"Pipings on Classifier: PARKER-Fittings; Assembly Instructions","n":"4100-2","d":"2000/0","c":"03","l":"OM-01","s":"8","k":"B02","p":"1_Data/Parker en.pdf","ok":true,"pdf":"1_Data/Parker en.pdf","alt":""},{"t":"Spring Assembly (M): Hydraulic Accumulator; Fitting and Maintenance Instructions; HYDAC","n":"3.201.B4","d":"1999/0","c":"13","l":"OM-01","s":"9","k":"A06","p":"1_Data/Hydraulikspeicher Einbau und Wartung de_en_fr.pdf","ok":true,"pdf":"1_Data/Hydraulikspeicher Einbau und Wartung de_en_fr.pdf","alt":""},{"t":"Spring Assembly (M): Bladder Accumulator; HYDAC-Documentation","n":"3.201.23","d":"xx.12.2002/0","c":"13","l":"OM-01","s":"9","k":"A06","p":"1_Data/Blasenspeicher Broschüre englisch.pdf","ok":true,"pdf":"1_Data/Blasenspeicher Broschüre englisch.pdf","alt":""},{"t":"Spring Assembly (M): Piston Accumulator; HYDAC-Documentation","n":"3.301.14","d":"xx.12.2002/0","c":"13","l":"OM-01","s":"9","k":"A06","p":"1_Data/Kolbenspeicher Broschüre englisch.pdf","ok":false,"pdf":"","alt":"1_Data/Piston Accumulator.pdf"},{"t":"Spring Assembly (M): Supports for Hydraulic Accumulators","n":"3.502.21","d":"xx.09.2002/0","c":"13","l":"OM-01","s":"9","k":"A06","p":"1_Data/Befestigungselemente Speicher deut_engl_franz.pdf","ok":true,"pdf":"1_Data/Befestigungselemente Speicher deut_engl_franz.pdf","alt":""},{"t":"Spring Assembly (M): Charging and Testing Unit FPU-1; Operating Instr.; HYDAC","n":"3.501.B3","d":"1999/0","c":"04","l":"OM-01","s":"9","k":"A06","p":"1_Data/Füll-und Prüfvorrichtung Operating Instructions_color.pdf","ok":true,"pdf":"1_Data/Füll-und Prüfvorrichtung Operating Instructions_color.pdf","alt":""},{"t":"Spring Assembly (M): Charging and Testing Unit FPU-1; HYDAC-Documentation","n":"3.501.8","d":"xx.07.2003/0","c":"13","l":"OM-01","s":"9","k":"A06","p":"1_Data/Füll-und Prüfvorrichtung Broschüre englisch.pdf","ok":true,"pdf":"1_Data/Füll-und Prüfvorrichtung Broschüre englisch.pdf","alt":""},{"t":"Spring Assembly (M) 380/160-280 stroke: Hydraulic Cylinder; RUHFUS-Docu.","n":"107215","d":"2004/0","c":"04","l":"OM-01","s":"10","k":"A06","p":"1_Data/Federungszylinder M en.pdf","ok":true,"pdf":"1_Data/Federungszylinder M en.pdf","alt":""},{"t":"Spring Assembly (S) 220/100x150 stroke: Hydraulic Cylinder; RUHFUS-Docu.","n":"107217","d":"2004/0","c":"04","l":"OM-01","s":"11","k":"A06","p":"1_Data/Federungszylinder S en.pdf","ok":true,"pdf":"1_Data/Federungszylinder S en.pdf","alt":""},{"t":"Hydraulic System of LOESCHE-Mill: Filling and Bleeding Instructions","n":"2-178","d":"12.05.2001/0","c":"03","l":"OM-01","s":"12","k":"A07","p":"1_Data/2_178.pdf","ok":true,"pdf":"1_Data/2_178.pdf","alt":""},{"t":"Hydraulic System of LOESCHE-Mill: Rinsing Instructions","n":"Q924034-00-4","d":"30.06.2003/0","c":"03","l":"OM-01","s":"12","k":"A07","p":"1_Data/924034e0.pdf","ok":true,"pdf":"1_Data/924034e0.pdf","alt":""},{"t":"Hydraulic System of LOESCHE-Mill: Operating Instructions","n":"BA911390-00-4","d":"24.05.2005/A","c":"10","l":"OM-01","s":"13","k":"A07","p":"1_Data/BA911390-00-4.pdf","ok":true,"pdf":"1_Data/BA911390-00-4.pdf","alt":""},{"t":"Hydraulic System of LOESCHE-Mill: Diagram; Spring Stiffness","n":"917731-00-4","d":"14.01.2003/0","c":"14","l":"OM-01","s":"13","k":"A07","p":"1_Data/917731-00-4_0.pdf","ok":true,"pdf":"1_Data/917731-00-4_0.pdf","alt":""},{"t":"Hydraulic System of LOESCHE-Mill: Diagram; Load per Roller","n":"917732-00-4","d":"19.02.2003/0","c":"14","l":"OM-01","s":"13","k":"A07","p":"1_Data/917732-00-4.pdf","ok":true,"pdf":"1_Data/917732-00-4.pdf","alt":""},{"t":"Hydraulic Cabinet HSLM 1000: INTEGRAL-Documentation","n":"46.081","d":"03.08.2004/0","c":"04","l":"OM-01","s":"14","k":"A07","p":"1_Data/HSLM en.pdf","ok":true,"pdf":"1_Data/HSLM en.pdf","alt":""},{"t":"Hydraulic Cabinet HSLM 1000: Hydraulic Scheme","n":"917665-00-0","d":"23.08.2004/C","c":"14","l":"OM-01","s":"14","k":"A07","p":"1_Data/917665-00-0.pdf","ok":true,"pdf":"1_Data/917665-00-0.pdf","alt":""},{"t":"Hydraulic Cabinet HSSW 100: INTEGRAL-Documentation","n":"46.082","d":"05.08.2004/0","c":"04","l":"OM-01","s":"15","k":"A07","p":"1_Data/HSSW en.pdf","ok":true,"pdf":"1_Data/HSSW en.pdf","alt":""},{"t":"Hydraulic Cabinet HSSW 100: Hydraulic Scheme","n":"917670-00-1","d":"30.11.2004/A","c":"14","l":"OM-01","s":"15","k":"A07","p":"1_Data/917670-00-1.pdf","ok":true,"pdf":"1_Data/917670-00-1.pdf","alt":""},{"t":"Hydraulic Cabinet HSMS 850: Operating Instructions","n":"BA911271-00-4","d":"08.09.1997/0","c":"10","l":"OM-01","s":"16","k":"A05","p":"1_Data/BA911271-00-4.pdf","ok":true,"pdf":"1_Data/BA911271-00-4.pdf","alt":""},{"t":"Hydraulic Cabinet HSMS 850: Malfunction Table","n":"4.F4221-0000","d":"27.07.1982/0","c":"06","l":"OM-01","s":"16","k":"A05","p":"1_Data/4221e0000.doc","ok":true,"pdf":"","alt":""},{"t":"Hydraulic Cabinet HSMS 850: INTEGRAL-Documentation","n":"46.080","d":"29.07.2004/0","c":"04","l":"OM-01","s":"17","k":"A05","p":"1_Data/HSMS en.pdf","ok":true,"pdf":"1_Data/HSMS en.pdf","alt":""},{"t":"Hydraulic Cabinet HSMS 850: Hydraulic Scheme","n":"917601-00-2","d":"08.08.2003/A","c":"14","l":"OM-01","s":"17","k":"A05","p":"1_Data/917601-00-2.pdf","ok":true,"pdf":"1_Data/917601-00-2.pdf","alt":""},{"t":"Hydraulic Cabinet HSLM: Sources of Errors and their Elimination","n":"4.F0889-0001","d":"04.04.1991/0","c":"06","l":"OM-01","s":"18","k":"A07","p":"1_Data/0889e0001.doc","ok":true,"pdf":"","alt":""},{"t":"Hydraulic Cabinet HSSW: Sources of Errors and their Elimination","n":"4.F0889-0001","d":"04.04.1991/0","c":"06","l":"OM-01","s":"18","k":"A07","p":"1_Data/0889e0001.doc","ok":true,"pdf":"","alt":""},{"t":"Hydraulic Cabinet HSMS: Sources of Errors and their Elimination","n":"4.F0889-0001","d":"04.04.1991/0","c":"06","l":"OM-01","s":"18","k":"A05","p":"1_Data/0889e0001.doc","ok":true,"pdf":"","alt":""},{"t":"Mill Gearbox LGP 1120-46 CS; RENK-Documentation","n":"80122833","d":"12.10.2004/0","c":"04","l":"OM-02","s":"-","k":"A11","p":"1_Data/Mühlengetriebe en.pdf","ok":true,"pdf":"1_Data/Mühlengetriebe en.pdf","alt":""},{"t":"LM-Lubrication Line; Grease Pump FZ-A/B; DELIMON-Documentation","n":"485060-01","d":"03.08.2004/0","c":"04","l":"OM-03","s":"1","k":"A08","p":"1_Data/LM-Schmierleitung.pdf","ok":true,"pdf":"1_Data/LM-Schmierleitung.pdf","alt":""},{"t":"Classifier Lubrication Line; Grease FZ-A/B; DELIMON-Documentation","n":"485060-11","d":"03.09.2004/0","c":"04","l":"OM-03","s":"2","k":"B02","p":"1_Data/Sichterschmierleitung.pdf","ok":true,"pdf":"1_Data/Sichterschmierleitung.pdf","alt":""},{"t":"Swinging Device with HSAV 125: Operating Instructions","n":"BA911250-03-4","d":"28.04.1999/0","c":"10","l":"OM-03","s":"3","k":"A13","p":"1_Data/BA911250-03-4.pdf","ok":true,"pdf":"1_Data/BA911250-03-4.pdf","alt":""},{"t":"HSAV 125 / Pump Trolley; RUHFUS-Documentation","n":"107237/1","d":"2004/0","c":"13","l":"OM-03","s":"4","k":"A13","p":"1_Data/HSAV en.pdf","ok":true,"pdf":"1_Data/HSAV en.pdf","alt":""},{"t":"Swinging Device: Hydraulic Cylinder; RUHFUS-Documentation","n":"107237","d":"2004/0","c":"04","l":"OM-03","s":"5","k":"A13","p":"1_Data/Schwenkzylinder en.pdf","ok":true,"pdf":"1_Data/Schwenkzylinder en.pdf","alt":""},{"t":"LOESCHE-Classifier LSKS 66 S; Operating Instructions","n":"BA911400-00-4","d":"24.02.2003/0","c":"10","l":"OM-03","s":"6","k":"B00","p":"1_Data/BA911400-00-4.pdf","ok":true,"pdf":"1_Data/BA911400-00-4.pdf","alt":""},{"t":"Classifier Upper Housing Lining; SC-Wearstop; DENSIT-Documentation","n":"-","d":"1999/0","c":"13","l":"OM-03","s":"7","k":"B01","p":"1_Data/densit_e.pdf","ok":true,"pdf":"1_Data/densit_e.pdf","alt":""},{"t":"Classifier Drive B2 SV 07; FLENDER-Documentation","n":"412 3221-","d":"2004/0","c":"04","l":"OM-03","s":"8","k":"B03","p":"1_Data/Sichtergetriebe en.pdf","ok":true,"pdf":"1_Data/Sichtergetriebe en.pdf","alt":""},{"t":"Classifier: Flap Positioning; Working Instructions","n":"AA911260-04-4","d":"01.07.2002/A","c":"03","l":"OM-03","s":"9","k":"B04","p":"1_Data/911260E4.DOC","ok":true,"pdf":"1_Data/911260E4.pdf","alt":""},{"t":"Magnetic Machine Type 0446-30/70 K G2:380 S T DN150; WAGNER-Documentation","n":"516924","d":"2004/0","c":"04","l":"OM-03","s":"10","k":"Q02","p":"1_Data/Magnetmaschine en.pdf","ok":true,"pdf":"1_Data/Magnetmaschine en.pdf","alt":""},{"t":"Mill Stand; System Dimension Sheet","n":"919605-00-3","d":"20.02.2003/0","c":"07","l":"SYS","s":"1","k":"A02","p":"1_Data/919605-00-3.pdf","ok":true,"pdf":"1_Data/919605-00-3.pdf","alt":""},{"t":"Mill Stand; Disposition Sheet","n":"919606-00-3","d":"25.02.2003/0","c":"07","l":"SYS","s":"1","k":"A02","p":"1_Data/919606-00-3.pdf","ok":true,"pdf":"1_Data/919606-00-3.pdf","alt":""},{"t":"Mill Boby; System Dimension Sheet","n":"913103-00-3","d":"06.09.2001/0","c":"07","l":"SYS","s":"2","k":"A03","p":"1_Data/913103-00-3.pdf","ok":true,"pdf":"1_Data/913103-00-3.pdf","alt":""},{"t":"Table; System Dimension Sheet","n":"902250-00-3","d":"22.05.2003/0","c":"07","l":"SYS","s":"3","k":"A04","p":"1_Data/902250-00-3_REV0.pdf","ok":true,"pdf":"1_Data/902250-00-3_REV0.pdf","alt":""},{"t":"Roller (M); System Dimension Sheet","n":"904112-00-3","d":"17.10.2002/0","c":"07","l":"SYS","s":"4","k":"A16","p":"1_Data/904112-00-3.pdf","ok":true,"pdf":"1_Data/904112-00-3.pdf","alt":""},{"t":"Roller (S); System Dimension Sheet","n":"903540-00-3","d":"28.09.1995/0","c":"07","l":"SYS","s":"5","k":"A16","p":"1_Data/903540-00-3.pdf","ok":true,"pdf":"1_Data/903540-00-3.pdf","alt":""},{"t":"Rocker Arm (M); System Dimension Sheet","n":"903527-00-3","d":"10.04.2003/C","c":"07","l":"SYS","s":"6","k":"A15","p":"1_Data/903527-00-3.pdf","ok":true,"pdf":"1_Data/903527-00-3.pdf","alt":""},{"t":"Rocker Arm (S); System Dimension Sheet","n":"902109-00-3","d":"11.03.1999/A","c":"07","l":"SYS","s":"7","k":"A15","p":"1_Data/902109-00-3.pdf","ok":true,"pdf":"1_Data/902109-00-3.pdf","alt":""},{"t":"Spring Assembly (M); System Dimension Sheet","n":"917728-00-3","d":"31.10.2002/0","c":"07","l":"SYS","s":"8","k":"A06","p":"1_Data/917728-00-3.pdf","ok":true,"pdf":"1_Data/917728-00-3.pdf","alt":""},{"t":"Cyllinder Spring Assembly (M); Dimension Sheet","n":"M907003-51-1","d":"21.03.2005/B","c":"07","l":"SYS","s":"8","k":"A06","p":"1_Data/M907003-51-1.pdf","ok":true,"pdf":"1_Data/M907003-51-1.pdf","alt":""},{"t":"Spring Assembly (S); System Dimension Sheet","n":"902113-00-3","d":"23.10.1995/0","c":"07","l":"SYS","s":"9","k":"A06","p":"1_Data/902113-00-3.pdf","ok":true,"pdf":"1_Data/902113-00-3.pdf","alt":""},{"t":"Cylinder Spring Assembly (S); Dimension Sheet","n":"M907006-03-1","d":"27.05.2004/F","c":"07","l":"SYS","s":"9","k":"A06","p":"1_Data/M907006-03-1f.pdf","ok":true,"pdf":"1_Data/M907006-03-1f.pdf","alt":""},{"t":"Bearing Cartridge; System Dimension Sheet","n":"929565-00-3","d":"16.10.2003/0","c":"07","l":"SYS","s":"10","k":"B02","p":"1_Data/929565-00-3.pdf","ok":true,"pdf":"1_Data/929565-00-3.pdf","alt":""},{"t":"Classifier Drive; System Dimension Sheet","n":"935000-00-3","d":"12.04.2005/0","c":"07","l":"SYS","s":"11","k":"B03","p":"1_Data/935000-00-3.pdf","ok":true,"pdf":"1_Data/935000-00-3.pdf","alt":""}],"quality":{"records":234,"uniquePaths":231,"onDisk":240,"orphans":[{"f":"~$1244E1.DOC","kind":"lock","mb":0,"hint":""},{"f":"~$1260E4.DOC","kind":"lock","mb":0,"hint":""},{"f":"911244E1.pdf","kind":"converted","mb":0.06,"hint":""},{"f":"911260E4.pdf","kind":"converted","mb":0.03,"hint":""},{"f":"911333E0.pdf","kind":"converted","mb":0.28,"hint":""},{"f":"Chockfast Orange Data.pdf","kind":"unlisted","mb":0.03,"hint":""},{"f":"Existing Vibrofeeder for Loesche Mill.pdf","kind":"unlisted","mb":7.91,"hint":""},{"f":"HSMS.pdf","kind":"unlisted","mb":3.96,"hint":""},{"f":"Lubrication Instruction.pdf","kind":"converted","mb":0.26,"hint":""},{"f":"Piston Accumulator.pdf","kind":"renamed","mb":0.96,"hint":""}],"dupes":[{"f":"0889e0001.doc","n":3},{"f":"parker en.pdf","n":2}],"missing":[{"path":"1_Data/Kolbenspeicher Broschüre englisch.pdf","title":"Spring Assembly (M): Piston Accumulator; HYDAC-Documentation","doc":"3.301.14","size":1006662,"foundIn":"Loesche Mill","alt":"1_Data/Piston Accumulator.pdf","cands":["1_Data/Piston Accumulator.pdf","Narayangonj Slag/731643520DATA/1_DATA/Kolbenspeicher Broschüre englisch.pdf"]}],"badLines":0,"mb":360}}</script>
+<script src="vendor/pdfjs/pdf.min.js"></script>
+<script>
+(function(){
+"use strict";
+var DATA = JSON.parse(document.getElementById('payload').textContent);
+var BASE = '';
+var OFFICE = ['doc','docx','xls','xlsx','ppt','pptx','rtf','dwg','zip'];
+var $ = function(id){ return document.getElementById(id); };
+DATA.records.forEach(function(r,i){ r._i = i; });
+
+/* ---------- helpers ---------- */
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function shortDate(d){
+  var m = /^(\d{2})\.(\d{2})\.(\d{4})(.*)$/.exec(d);
+  return m ? (m[3]+'-'+m[2]+'-'+m[1]+m[4]) : d;
+}
+
+/* ---------- header ---------- */
+var P = DATA.project;
+function dec(s){ return String(s==null?'':s).replace(/@/g,' '); }
+$('h-title').textContent = dec(P.Project) || 'Technical Documentation';
+$('h-sub').textContent = 'Project ' + dec(P.Project_no) + '  ·  ' + dec(P.DocuType) + '  ·  Loesche Document-Manager';
+[['Project no',P.Project_no],['Plant',(P.Plant||'').replace(/@/g,' ')],
+ ['Machine',(P.Machine||'').replace(/@/g,' ')],['Customer',(P.Customer||'').replace(/@/g,' ')],
+ ['Status',P.DocInfoStat],['Doc. rev',P.DocInfoDatRev],['Language',P.MainLanguage]
+].forEach(function(p){
+  if(!p[1]) return;
+  var s=document.createElement('span');
+  s.innerHTML = esc(p[0])+': <b>'+esc(String(p[1]).replace(/@/g,' '))+'</b>';
+  $('h-meta').appendChild(s);
+});
+
+/* ---------- selects ---------- */
+var docCodes={}, lists={};
+DATA.records.forEach(function(r){ docCodes[r.c]=1; lists[r.l]=1; });
+Object.keys(docCodes).sort().forEach(function(k){
+  var o=document.createElement('option'); o.value=k;
+  o.textContent = k + ' — ' + (DATA.doccodes[k]||'?'); $('f-doc').appendChild(o);
+});
+Object.keys(lists).sort().forEach(function(k){
+  var o=document.createElement('option'); o.value=k; o.textContent=k; $('f-list').appendChild(o);
+});
+
+/* ---------- class tree ---------- */
+var clsCount={};
+DATA.records.forEach(function(r){ clsCount[r.k]=(clsCount[r.k]||0)+1; });
+function buildTree(){
+  var html='<li><button data-c="" class="'+(state.cls===''?'sel':'')+'">'+
+           '<span class="code">ALL</span><span class="nm">All classes</span>'+
+           '<span class="n">'+DATA.records.length+'</span></button></li>';
+  Object.keys(DATA.classes).forEach(function(code){
+    var n = clsCount[code]||0;
+    if(!n) return;                                   /* hide classes with no documents */
+    html += '<li><button data-c="'+esc(code)+'" class="'+(state.cls===code?'sel':'')+'">'+
+            '<span class="code">'+esc(code)+'</span>'+
+            '<span class="nm" title="'+esc(DATA.classes[code])+'">'+esc(DATA.classes[code])+'</span>'+
+            '<span class="n">'+n+'</span></button></li>';
+  });
+  /* classes used by records but absent from Class.dat */
+  Object.keys(clsCount).forEach(function(c){
+    if(DATA.classes[c]) return;
+    html += '<li><button data-c="'+esc(c)+'" class="'+(state.cls===c?'sel':'')+'">'+
+            '<span class="code">'+esc(c)+'</span><span class="nm">(undefined)</span>'+
+            '<span class="n">'+clsCount[c]+'</span></button></li>';
+  });
+  $('tree-cls').innerHTML = html;
+  Array.prototype.forEach.call($('tree-cls').querySelectorAll('button'), function(b){
+    b.addEventListener('click', function(){ state.cls=b.dataset.c; render(); });
+  });
+}
+
+/* ---------- state ---------- */
+var state = { q:'', cls:'', doc:'', list:'', sort:'t', dir:1, missing:false };
+
+function filtered(){
+  var q = state.q.trim().toLowerCase();
+  var out = DATA.records.filter(function(r){
+    if(state.cls && r.k!==state.cls) return false;
+    if(state.doc && r.c!==state.doc) return false;
+    if(state.list && r.l!==state.list) return false;
+    if(state.missing && r.ok) return false;
+    if(q){
+      var hay = (r.t+' '+r.n+' '+r.p).toLowerCase();
+      if(hay.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  var k = state.sort, d = state.dir;
+  out.sort(function(a,b){
+    var x=a[k], y=b[k];
+    if(k==='d'){ x=shortDate(a.d); y=shortDate(b.d); }
+    if(k==='s'){ x=+a.s; y=+b.s; return (x-y)*d; }
+    x=String(x).toLowerCase(); y=String(y).toLowerCase();
+    return x<y?-1*d : x>y?1*d : 0;
+  });
+  return out;
+}
+
+function render(){
+  var rows = filtered();
+  var tb = $('tbody'), html = '';
+  rows.forEach(function(r){
+    var href = BASE + encodeURI(r.p);
+    var ext = (r.p.split('.').pop()||'').toLowerCase();
+    var office = OFFICE.indexOf(ext) >= 0;
+    var fileCell;
+    if(r.ok){
+      fileCell = '<a class="open" href="'+esc(href)+'" data-p="'+esc(r.p)+'" data-i="'+r._i+'">Open ↗</a>';
+      if(office) fileCell += '<span class="flag" title="Office file — browsers download these instead of displaying them. Open ↗ uses the built-in viewer.">OFFICE</span>';
+    }else{
+      fileCell = '<span class="miss" title="Referenced by the index but not present in 1_Data">missing</span>';
+      if(r.alt) fileCell += '<a class="alt" href="'+esc(BASE+encodeURI(r.alt))+'" data-p="'+esc(r.alt)+'" data-i="'+r._i+'" title="The same file exists elsewhere in 731643520Data — open that copy">copy ↗</a>';
+      else fileCell += '<span class="flag" title="No copy of this file exists anywhere in 731643520Data">no file</span>';
+    }
+    if(r.ok && r.pdf && office) fileCell += '<a class="alt" href="'+esc(BASE+encodeURI(r.pdf))+'" data-p="'+esc(r.pdf)+'" data-i="'+r._i+'" title="PDF rendering — opens in the browser">PDF ↗</a>';
+    html += '<tr>'+
+      '<td class="t">'+esc(r.t)+'</td>'+
+      '<td class="docno">'+esc(r.n)+'</td>'+
+      '<td class="mono">'+esc(shortDate(r.d))+'</td>'+
+      '<td class="mono">'+esc(r.s)+'</td>'+
+      '<td><span class="pill" title="'+esc(DATA.doccodes[r.c]||'')+'">'+esc(r.c)+'</span></td>'+
+      '<td><span class="pill cls" title="'+esc(DATA.classes[r.k]||'undefined class')+'">'+esc(r.k)+'</span></td>'+
+      '<td class="mono">'+esc(r.l)+'</td>'+
+      '<td>'+fileCell+'</td></tr>';
+  });
+  tb.innerHTML = html;
+  $('empty').style.display = rows.length ? 'none' : 'block';
+
+  $('count').innerHTML = '<b>'+rows.length+'</b> of '+DATA.records.length+' documents';
+  ['t','n','d','s','c','k','l'].forEach(function(c){
+    $('ar-'+c).textContent = state.sort===c ? (state.dir>0?'▲':'▼') : '';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('thead th[data-s]'), function(th){
+    th.style.color = state.sort===th.dataset.s ? 'var(--accent2)' : '';
+  });
+  $('f-missing').classList.toggle('on', state.missing);
+  buildTree();
+}
+
+/* ---------- viewer ---------- */
+var RENDERABLE = ['pdf','png','jpg','jpeg','gif','svg','webp','bmp','txt','csv','html','htm','xml'];
+var IMAGE = ['png','jpg','jpeg','gif','svg','webp','bmp'];
+var vMask=$('mask'), vFrame=$('v-frame'), vNote=$('v-note'), vTitle=$('v-title'),
+    vPath=$('v-path'), vNew=$('v-new'), vDl=$('v-dl'), vPdf=$('v-pdf'), vImg=$('v-img');
+var cur = null;
+
+var pdfjs = window.pdfjsLib || null;
+if(pdfjs){ try { pdfjs.GlobalWorkerOptions.workerSrc = BASE + 'vendor/pdfjs/pdf.worker.min.js'; } catch(e){} }
+var pdfToken = 0;
+
+function viewUrl(rel){ return BASE + encodeURI(rel); }
+function extOf(rel){ return (rel.split('.').pop()||'').toLowerCase(); }
+function fileLabel(rel){ return decodeURIComponent(rel.split('/').pop()); }
+
+function hideAll(){
+  pdfToken++;
+  vPdf.style.display = 'none'; vPdf.innerHTML = '';
+  vImg.style.display = 'none'; vImg.removeAttribute('src');
+  vFrame.style.display = 'none'; vFrame.src = 'about:blank';
+  vNote.classList.remove('on');
+}
+function setHead(rel){
+  var url = viewUrl(rel);
+  vNew.href = url; vDl.href = url;
+  vDl.setAttribute('download', fileLabel(rel));
+  vPath.textContent = decodeURIComponent(rel);
+}
+
+function showImage(rel){
+  setHead(rel); hideAll();
+  vImg.style.display = 'block';
+  vImg.src = viewUrl(rel);
+}
+
+function showFrame(rel){
+  setHead(rel); hideAll();
+  vFrame.style.display = 'block';
+  setTimeout(function(){ vFrame.src = viewUrl(rel); }, 0);
+}
+
+function showPdf(rel){
+  setHead(rel); hideAll();
+  if(!pdfjs){ showNotice(rel); return; }
+  var token = ++pdfToken;
+  vPdf.style.display = 'block';
+  var status = document.createElement('div');
+  status.className = 'vload'; status.textContent = 'Rendering PDF…';
+  vPdf.appendChild(status);
+
+  pdfjs.getDocument(viewUrl(rel)).promise.then(function(pdf){
+    if(token !== pdfToken) return;
+    var total = pdf.numPages, pageNo = 1;
+    status.textContent = 'Rendering page 1 of ' + total + '…';
+    (function next(){
+      if(token !== pdfToken || pageNo > total){ if(status.parentNode) status.parentNode.removeChild(status); return; }
+      pdf.getPage(pageNo).then(function(page){
+        if(token !== pdfToken) return;
+        status.textContent = 'Rendering page ' + pageNo + ' of ' + total + '…';
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var vp = page.getViewport({ scale: dpr });
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.floor(vp.width);
+        canvas.height = Math.floor(vp.height);
+        vPdf.insertBefore(canvas, status);
+        page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise.then(function(){
+          pageNo++; next();
+        });
+      }).catch(function(){ pageNo++; next(); });
+    })();
+  }).catch(function(err){
+    if(token !== pdfToken) return;
+    vPdf.innerHTML = '<div class="verr">Could not render this PDF in the browser.<br>' +
+      esc((err && err.message) ? err.message : String(err)) + '<br><br>' +
+      '<a href="'+esc(viewUrl(rel))+'" target="_blank" rel="noopener">Open in a new tab</a> · ' +
+      '<a href="'+esc(viewUrl(rel))+'" download>Download</a></div>';
+  });
+}
+
+function showSource(rel){
+  var ext = extOf(rel);
+  if(ext === 'pdf') return showPdf(rel);
+  if(IMAGE.indexOf(ext) >= 0) return showImage(rel);
+  return showFrame(rel);
+}
+
+function showNotice(rel){
+  var url = viewUrl(rel), ext = extOf(rel).toUpperCase();
+  setHead(rel); hideAll();
+  var acts = '';
+  if(cur && cur.r.pdf && cur.r.pdf !== rel){
+    acts += '<a href="#" data-act="pdf">View PDF version ↗</a>';
+  }
+  acts += '<a href="'+esc(url)+'" target="_blank" rel="noopener">Open in new tab ↗</a>';
+  acts += '<a href="'+esc(url)+'" download>Download ↓</a>';
+  vNote.innerHTML =
+    '<p><b>'+esc(fileLabel(rel))+'</b> is a <b>'+esc(ext)+'</b> file. '+
+    'Browsers cannot display Office files in the page.'+
+    (acts.indexOf('data-act="pdf"')>=0 ? '<br>A PDF version of this exact document is available and opens in the viewer.' : '')+
+    '</p><div class="acts">'+acts+'</div>';
+  vNote.classList.add('on');
+}
+
+function openView(rel, r){
+  cur = { rel: rel, r: r || {} };
+  vTitle.textContent = (r && r.t) ? r.t : fileLabel(rel);
+  if(RENDERABLE.indexOf(extOf(rel)) >= 0) showSource(rel); else showNotice(rel);
+  vMask.classList.add('on');
+  document.documentElement.style.overflow = 'hidden';
+}
+function closeView(){
+  vMask.classList.remove('on');
+  hideAll();
+  document.documentElement.style.overflow = '';
+  cur = null;
+}
+vNote.addEventListener('click', function(e){
+  var a = e.target.closest && e.target.closest('[data-act="pdf"]');
+  if(a){ e.preventDefault(); if(cur && cur.r.pdf) showSource(cur.r.pdf); }
+});
+$('v-close').addEventListener('click', closeView);
+vMask.addEventListener('click', function(e){ if(e.target === vMask) closeView(); });
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && vMask.classList.contains('on')){ e.preventDefault(); closeView(); }
+});
+function onDocClick(e){
+  var a = e.target.closest && e.target.closest('a[data-p]');
+  if(!a) return;
+  if(e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;   // keep native new-tab behaviour
+  var p = a.getAttribute('data-p');
+  /* Opened as a local file (file://): embeddable files display inline when opened
+     in a real tab, but downloading behaviour varies when sandboxed in an iframe. */
+  if(location.protocol === 'file:' && RENDERABLE.indexOf(extOf(p)) >= 0){
+    e.preventDefault();
+    window.open(viewUrl(p), '_blank');
+    return;
+  }
+  e.preventDefault();
+  openView(p, DATA.records[+a.getAttribute('data-i')] || null);
+}
+$('tbody').addEventListener('click', onDocClick);
+
+/* ---------- events ---------- */
+var t;
+$('q').addEventListener('input', function(e){
+  clearTimeout(t); var v=e.target.value;
+  t=setTimeout(function(){ state.q=v; render(); },120);
+});
+$('f-doc').addEventListener('change', function(e){ state.doc=e.target.value; render(); });
+$('f-list').addEventListener('change', function(e){ state.list=e.target.value; render(); });
+$('f-missing').addEventListener('click', function(){ state.missing=!state.missing; render(); });
+$('reset').addEventListener('click', function(){
+  state={q:'',cls:'',doc:'',list:'',sort:'t',dir:1,missing:false};
+  $('q').value=''; $('f-doc').value=''; $('f-list').value=''; render();
+});
+Array.prototype.forEach.call(document.querySelectorAll('thead th[data-s]'), function(th){
+  th.addEventListener('click', function(){
+    var s = th.dataset.s;
+    if(state.sort===s) state.dir=-state.dir; else { state.sort=s; state.dir=1; }
+    render();
+  });
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='/' && document.activeElement!==$('q')){ e.preventDefault(); $('q').focus(); $('q').select(); }
+  if(e.key==='Escape' && document.activeElement===$('q')){ $('q').blur(); }
+});
+
+/* ---------- local-file guidance ---------- */
+if(location.protocol === 'file:'){
+  var bar = document.createElement('div');
+  bar.setAttribute('style','position:sticky;top:0;z-index:80;background:#b3341f;color:#fff;padding:10px 16px;font-size:13.5px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.25)');
+  bar.innerHTML =
+    'Opened as a local file — PDFs may download instead of opening. For click-to-view, close this and double-click ' +
+    '<b style="font-family:Consolas,monospace;background:rgba(255,255,255,.16);padding:1px 7px;border-radius:4px">Open Documents.bat</b> in the Losche folder.' +
+    '<a href="http://localhost:8095/" style="margin-left:auto;background:#fff;color:#b3341f;font-weight:700;padding:6px 12px;border-radius:6px;text-decoration:none;white-space:nowrap">Try browser viewer &#8599;</a>';
+  document.body.insertBefore(bar, document.body.firstChild);
+}
+
+render();
+})();
+</script>
+</body>
+</html>
