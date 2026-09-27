@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16202b">
+<meta name="color-scheme" content="light">
+<meta name="format-detection" content="telephone=no">
 <title>Document-Manager — Narayangonj Slag (731643520)</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232b5fd9'/%3E%3Ctext x='16' y='22' font-family='Segoe UI,Arial' font-size='14' font-weight='700' fill='%23fff' text-anchor='middle'%3EDM%3C/text%3E%3C/svg%3E">
 <style>
@@ -143,6 +146,66 @@ details[open] summary{margin-bottom:8px}
 footer{margin-top:26px;color:var(--muted);font-size:12px;text-align:center;line-height:1.7}
 kbd{background:#eef2f6;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;
   padding:0 5px;font-size:11px;font-family:Consolas,monospace}
+
+/* ---------- responsive / touch ---------- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,canvas{max-width:100%}
+.side-toggle{display:none}
+.side .count-tag{display:none}
+
+@media(max-width:980px){
+  .wrap{padding:0 12px 40px}
+  h1{font-size:20px}
+  .sub{font-size:12.5px}
+  header{padding:16px 0 14px}
+  .cols{gap:12px}
+  .side{position:static;max-height:none;overflow:visible}
+  .side-toggle{display:inline-block;margin-left:auto;font:inherit;font-size:12px;font-weight:600;
+    color:var(--accent2);background:#eef4fb;border:1px solid #cfe0f3;border-radius:20px;
+    padding:4px 12px;cursor:pointer}
+  .side .grp{display:none}
+  .side.open .grp{display:block}
+  .side .card-title{display:flex;align-items:center}
+}
+
+@media(max-width:760px){
+  .toolbar{gap:8px;padding:10px}
+  .toolbar input[type=search]{flex:1 1 100%;min-width:0;font-size:16px;padding:11px 12px}
+  select{flex:1 1 calc(50% - 4px);max-width:none;width:auto;font-size:14px;padding:10px}
+  .btn{padding:10px 14px;font-size:13.5px}
+  .count{flex-basis:100%;margin-left:0;text-align:right}
+
+  .tbl-wrap{max-height:none;overflow:visible}
+  table,thead,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tbody tr{border:1px solid var(--line);border-radius:12px;background:#fff;margin:10px 0;
+    box-shadow:var(--shadow);overflow:hidden}
+  tbody tr:nth-child(even){background:#fff}
+  tbody td{padding:9px 12px;border-bottom:1px solid #f0f3f7;font-size:13.5px}
+  tbody tr:hover,tbody tr:nth-child(even):hover{background:#fff}
+  tbody td:last-child{border-bottom:0}
+  tbody td[data-l]::before{content:attr(data-l);display:block;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px}
+  tbody td.t{font-size:15px;padding-top:12px;padding-bottom:4px}
+  tbody td.t[data-l]::before{content:none}
+  .open{padding:8px 14px;font-size:13.5px}
+  .alt,.flag{margin-top:4px}
+
+  .mask{padding:0;backdrop-filter:none}
+  .vbox{width:100%;height:100%;max-height:100%;border-radius:0}
+  .vhead{gap:8px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top))}
+  .vhead .vt{font-size:15px;flex:1 1 100%}
+  .vhead .btn{padding:9px 12px}
+  .x{font-size:26px;padding:2px 10px;margin-left:auto}
+  .vpdf{padding:6px}
+  .vpdf canvas{margin-bottom:8px}
+  .vnote{padding:20px}
+}
+
+@media(max-width:400px){
+  select{flex:1 1 100%}
+  h1{font-size:18px}
+}
 </style>
 </head>
 <body>
@@ -167,8 +230,8 @@ kbd{background:#eef2f6;border:1px solid var(--line);border-bottom-width:2px;bord
   </div>
 
   <div class="cols">
-    <aside class="card side">
-      <h2>Equipment classes</h2>
+    <aside class="card side" id="side">
+      <h2 class="card-title">Equipment classes <button class="side-toggle" id="side-toggle" type="button" aria-expanded="false" aria-controls="side">Show &#9662;</button></h2>
       <div class="grp">
         <div class="grp-title">Filter</div>
         <ul class="tree" id="tree-cls"></ul>
@@ -347,14 +410,14 @@ function render(){
     }
     if(r.ok && r.pdf && office) fileCell += '<a class="alt" href="'+esc(BASE+encodeURI(r.pdf))+'" data-p="'+esc(r.pdf)+'" data-i="'+r._i+'" title="PDF rendering — opens in the browser">PDF ↗</a>';
     html += '<tr>'+
-      '<td class="t">'+esc(r.t)+'</td>'+
-      '<td class="docno">'+esc(r.n)+'</td>'+
-      '<td class="mono">'+esc(shortDate(r.d))+'</td>'+
-      '<td class="mono">'+esc(r.s)+'</td>'+
-      '<td><span class="pill" title="'+esc(DATA.doccodes[r.c]||'')+'">'+esc(r.c)+'</span></td>'+
-      '<td><span class="pill cls" title="'+esc(DATA.classes[r.k]||'undefined class')+'">'+esc(r.k)+'</span></td>'+
-      '<td class="mono">'+esc(r.l)+'</td>'+
-      '<td>'+fileCell+'</td></tr>';
+      '<td class="t" data-l="Designation">'+esc(r.t)+'</td>'+
+      '<td class="docno" data-l="Document-No">'+esc(r.n)+'</td>'+
+      '<td class="mono" data-l="Rev / Date">'+esc(shortDate(r.d))+'</td>'+
+      '<td class="mono" data-l="Sheet">'+esc(r.s)+'</td>'+
+      '<td data-l="Type"><span class="pill" title="'+esc(DATA.doccodes[r.c]||'')+'">'+esc(r.c)+'</span></td>'+
+      '<td data-l="Class"><span class="pill cls" title="'+esc(DATA.classes[r.k]||'undefined class')+'">'+esc(r.k)+'</span></td>'+
+      '<td class="mono" data-l="List">'+esc(r.l)+'</td>'+
+      '<td data-l="File">'+fileCell+'</td></tr>';
   });
   tb.innerHTML = html;
   $('empty').style.display = rows.length ? 'none' : 'block';
@@ -511,6 +574,17 @@ function onDocClick(e){
   openView(p, DATA.records[+a.getAttribute('data-i')] || null);
 }
 $('tbody').addEventListener('click', onDocClick);
+
+/* ---------- sidebar toggle (small screens) ---------- */
+(function(){
+  var side=$('side'), t=$('side-toggle');
+  if(!side || !t) return;
+  t.addEventListener('click', function(){
+    var open = side.classList.toggle('open');
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    t.innerHTML = open ? 'Hide ▴' : 'Show ▾';
+  });
+})();
 
 /* ---------- events ---------- */
 var t;
